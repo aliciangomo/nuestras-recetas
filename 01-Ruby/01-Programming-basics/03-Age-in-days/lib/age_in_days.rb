@@ -11,4 +11,3 @@ def age_in_days(day, month, year)
 end
 
 
-puts age_in_days(20, 5, 2001)
