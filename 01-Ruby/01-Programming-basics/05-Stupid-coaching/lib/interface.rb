@@ -4,5 +4,6 @@ require_relative "coach_answer"
 puts "Hello, I am your personal coach"
 user_input = gets.chomp
 
-puts coach_answer_enhanced(user_input)
-
+until user_input != "I am going to work right now!" || "I am going to work right now!".upcase
+  coach_answer(user_input)
+end
