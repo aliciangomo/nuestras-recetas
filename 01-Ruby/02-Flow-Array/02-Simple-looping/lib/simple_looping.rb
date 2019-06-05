@@ -14,17 +14,15 @@ end
 
 def sum_with_while(min, max)
   # CONSTRAINT: you should use a while..end structure
-  if min > max
-    return -1
-  else
-    sum = 0
-    num = min
-    while num >= min && num <= max
-      sum = num + sum
-      num += 1
-    end
-    return sum
+  return -1 if min > max
+
+  sum = 0
+  num = min
+  while num >= min && num <= max
+    sum = num + sum
+    num += 1
   end
+  return sum
 end
 
 puts sum_with_for(10, 6)
