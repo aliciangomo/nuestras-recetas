@@ -16,3 +16,4 @@ end
 
 
 p poor_calories_counter("McChicken", "French Fries", "Sprite") # => 730
+

@@ -1,0 +1,11 @@
+describe("acronymize") do
+ it ("returns an empty string when passed an empty string") do
+   actual = acronimize("")
+   expected = ""
+   expect(actual).to eq(expected)
+
+
+
+
+
+In terminal run rspec filename.rb
