@@ -32,8 +32,8 @@ class OrangeTree
   def dead?
     if @age < 51
       @is_dead = false
-    else
-      @is_dead = true if rand(100) < (@age.to_i - 50) * 2
+    elsif rand(100) < (@age.to_i - 50) * 2
+      @is_dead = true
     end
     return @is_dead
   end
@@ -41,8 +41,8 @@ class OrangeTree
   # - A tree will produce 200 fruits a year when it reaches 10 years old.
   # - A tree will not produce fruits once it reaches 15 years old.
 
-# orange_tree = OrangeTree.new
-# p orange_tree.dead?
+  # orange_tree = OrangeTree.new
+  # p orange_tree.dead?
 
   def grow_fruits
     @fruits = 0
