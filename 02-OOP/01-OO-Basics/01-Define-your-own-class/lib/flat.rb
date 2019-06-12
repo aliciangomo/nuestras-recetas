@@ -20,7 +20,7 @@ class Flat
     if @for_sale == false
       puts "Do you want to sale your flat? y/n"
       user_input = gets.chomp
-      if user_input.match(/y/i)
+      if user_input.match?(/y/i)
         @for_sale = true
         puts "Congrats! Your flat is now listed!"
       end
