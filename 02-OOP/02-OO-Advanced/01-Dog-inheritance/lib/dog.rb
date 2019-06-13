@@ -4,5 +4,9 @@ class Dog
   end
 end
 
-class GermanShepherd
+class GermanShepherd < Dog
 end
+
+
+german_shepherd = GermanShepherd.new
+german_shepherd.bark # => "woof woof"
