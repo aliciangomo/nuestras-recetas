@@ -10,7 +10,7 @@ def most_successful(number, max_year, file_path)
     earnings = row[2].to_i
     next if year >= max_year
 
-    movies << { name: row[0], year: year, earnings: earnings}
+    movies << { name: row[0], year: year, earnings: earnings }
   end
 
   # movies.map! { |movie| "{ name: #{movie[0]}, year: #{year}, earnings: #{earnings}" }
