@@ -2,7 +2,7 @@ require 'csv'
 require_relative '../models/employee'
 
 class EmployeeRepository
-  attr_reader :employees
+
   def initialize(csv_file)
     @csv_file = csv_file
     File.new(csv_file, "w+") unless File.exist?(csv_file)
@@ -25,8 +25,16 @@ class EmployeeRepository
     return @employees
   end
 
-  def find_employee(user_name)
+  def find_by_username(user_name)
     return @employees.find { |employee| employee.username == user_name }
+  end
+
+  def all_delivery_guys
+    return @employees.select { |employee| employee.role == "delivery_guy" }
+  end
+
+  def find(id)
+    return @employees.find { |employee| employee.id == id }
   end
 
   # def find_password(user_name, password)

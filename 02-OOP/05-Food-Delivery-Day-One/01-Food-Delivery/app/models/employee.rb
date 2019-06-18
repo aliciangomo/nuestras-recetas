@@ -12,4 +12,12 @@ class Employee
   def test_password(password)
     @password == password
   end
+
+  def manager?
+    @role == "manager"
+  end
+
+  def delivery_guy?
+    @role == "delivery_guy"
+  end
 end
