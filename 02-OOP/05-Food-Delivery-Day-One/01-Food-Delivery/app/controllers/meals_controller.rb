@@ -18,7 +18,7 @@ class MealsController
   def add
     name = @view_meal.meal_name
     price = @view_meal.meal_price
-    meal = MealRepository.new({ name: name, price: price })
+    meal = Meal.new({ name: name, price: price })
     @mealrepository.add(meal)
   end
 end

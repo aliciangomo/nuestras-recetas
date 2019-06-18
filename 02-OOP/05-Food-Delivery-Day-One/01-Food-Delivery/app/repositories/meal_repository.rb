@@ -52,5 +52,5 @@ class MealRepository
   end
 end
 
-mealrepository = MealRepository.new("meals.csv")
-p mealrepository.all
+# mealrepository = MealRepository.new("meals.csv")
+# p mealrepository.all
