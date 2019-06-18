@@ -5,9 +5,7 @@ class EmployeeRepository
   attr_reader :employees
   def initialize(csv_file)
     @csv_file = csv_file
-    unless File.exist?(csv_file)
-      File.new(csv_file, "w+")
-    end
+    File.new(csv_file, "w+") unless File.exist?(csv_file)
     @employees = []
     load_csv
   end
@@ -28,7 +26,7 @@ class EmployeeRepository
   end
 
   def find_employee(user_name)
-    employee = @employees.find {|employee| employee.username == user_name}
+    return @employees.find { |employee| employee.username == user_name }
   end
 
   # def find_password(user_name, password)

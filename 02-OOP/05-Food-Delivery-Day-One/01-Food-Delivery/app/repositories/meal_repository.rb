@@ -4,9 +4,7 @@ require_relative '../models/meal'
 class MealRepository
   def initialize(csv_file)
     @csv_file = csv_file
-    unless File.exist?(csv_file)
-      File.new(csv_file, "w+")
-    end
+    File.new(csv_file, "w+") unless File.exist?(csv_file)
     @meals = []
     @next_id = 0
     load_csv
@@ -27,7 +25,7 @@ class MealRepository
     csv_options = { headers: :first_row, col_sep: ',', force_quotes: true, quote_char: '"' }
     filepath = @csv_file
     CSV.open(filepath, 'wb', csv_options) do |csv|
-      csv  << ["name", "price", "id"]
+      csv << ["name", "price", "id"]
       @meals.each do |meal|
         csv << [meal.name, meal.price, meal.id]
       end

@@ -18,7 +18,7 @@ class CustomersController
   def add
     name = @view_customer.customer_name
     address = @view_customer.customer_address
-    customer = Customer.new({name: name, address: address})
+    customer = Customer.new(name: name, address: address)
     @customerrepository.add(customer)
   end
 end

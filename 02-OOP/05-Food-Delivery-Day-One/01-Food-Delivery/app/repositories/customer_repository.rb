@@ -4,8 +4,8 @@ require_relative '../models/customer'
 class CustomerRepository
   def initialize(csv_file)
     @csv_file = csv_file
-    unless File.exist?(csv_file)
-      File.new(csv_file, "w+")
+    File.new(csv_file, "w+") unless File.exist?(csv_file)
+
     end
     @customers = []
     @next_id = 0

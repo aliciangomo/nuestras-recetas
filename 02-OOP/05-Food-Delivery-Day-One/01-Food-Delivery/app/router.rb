@@ -1,6 +1,6 @@
 # TODO: implement the router of your app.
 class Router
-  def initialize(attributes ={})
+  def initialize(attributes = {})
     @meals_controller = attributes[:meals_controller]
     @customers_controller = attributes[:customers_controller]
     @employee_repository = attributes[:employee_repository]
@@ -33,14 +33,11 @@ class Router
     @user = nil
     while @user.nil?
       puts "Enter your username"
-      puts ">"
       user_name = gets.chomp
       puts "password?"
-      puts ">"
       password = gets.chomp
       employee = @employee_repository.find_employee(user_name)
-      correct_password = employee.test_password(password)
-      if correct_password
+      if employee.test_password(password) == true
         @user = employee
         puts "Welcome #{user_name}!"
       else
@@ -49,7 +46,7 @@ class Router
     end
   end
 
-#DELIVERY_GUY_DASHBOARD
+  # DELIVERY_GUY_DASHBOARD
 
   def route_delivery_guy_action(action_delivery_guy)
     case action_delivery_guy
@@ -72,9 +69,9 @@ class Router
     puts "3 - Stop and exit the program"
   end
 
-#MANAGER DASHBOARD
+  # MANAGER DASHBOARD
 
-   def route_manager_action(action_manager)
+  def route_manager_action(action_manager)
     case action_manager
     when 1 then @meals_controller.list
     when 2 then @meals_controller.add
@@ -96,7 +93,7 @@ class Router
     puts "4 - Stop and exit the program"
   end
 
-# ---------------------------------------------------------------
+  # ---------------------------------------------------------------
 
   def stop
     @running = false
