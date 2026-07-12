@@ -6,6 +6,7 @@ body{
   display:flex;justify-content:center;align-items:center;min-height:100vh;
   font-family:'DM Sans',system-ui,-apple-system,sans-serif;
   -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
 }
 input,textarea,select,button{font-family:inherit}
 /* Prevent iOS auto-zoom on input focus (requires font-size >= 16px) */
