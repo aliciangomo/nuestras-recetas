@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { db } from './firebase.js';
 import { TOKENS, T } from './tokens.js';
 import { INITIAL_RECIPES } from './data.js';
 import { S } from './strings.js';
@@ -19,71 +21,84 @@ export default function App() {
   const tok = TOKENS[palette];
   const accent = tok.accent;
 
-  const [recipes, setRecipes] = useState(() => {
-    try {
-      const saved = localStorage.getItem('nuestrasRecetas_v1');
-      return saved ? JSON.parse(saved) : INITIAL_RECIPES;
-    } catch { return INITIAL_RECIPES; }
-  });
+  const [recipes, setRecipes] = useState([]);
   const [tab, setTab] = useState('home');
   const [selectedId, setSelectedId] = useState(null);
   const [shareTarget, setShareTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [editTarget, setEditTarget] = useState(null);
   const [toast, setToast] = useState(null);
+  const seeded = useRef(false);
+
+  const col = collection(db, 'recipes');
+
+  // Real-time sync with Firestore
+  useEffect(() => {
+    const unsub = onSnapshot(col, async (snap) => {
+      if (snap.empty && !seeded.current) {
+        seeded.current = true;
+        const batch = writeBatch(db);
+        INITIAL_RECIPES.forEach(r => {
+          batch.set(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
+        });
+        await batch.commit();
+      } else {
+        setRecipes(snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id));
+      }
+    });
+    return unsub;
+  }, []);
 
   const selected = selectedId != null ? recipes.find(r => r.id === selectedId) : null;
-
   const goTab = t => { setSelectedId(null); setTab(t); };
-
-  const toggleFav = id => {
-    setRecipes(rs => rs.map(r => r.id === id ? { ...r, favourite: !r.favourite } : r));
-    const r = recipes.find(x => x.id === id);
-    if (r && !r.favourite) flashToast(S.toastSaved);
-  };
-
-  const onPhotoChange = (id, dataUrl) => {
-    setRecipes(rs => rs.map(r => r.id === id ? { ...r, photo: dataUrl } : r));
-    flashToast(S.toastPhoto);
-  };
-
-  const onAddPhoto = (id, dataUrl) => {
-    setRecipes(rs => rs.map(r => r.id === id ? { ...r, photos: [...(r.photos || []), dataUrl] } : r));
-    flashToast(S.toastPhoto);
-  };
-
-  const onRemovePhoto = (id, idx) => {
-    setRecipes(rs => rs.map(r => r.id === id ? { ...r, photos: (r.photos || []).filter((_, i) => i !== idx) } : r));
-  };
-
-  const confirmDelete = () => {
-    setRecipes(rs => rs.filter(r => r.id !== deleteTarget.id));
-    setDeleteTarget(null);
-    setSelectedId(null);
-    flashToast(S.toastDeleted);
-  };
-
-  const addRecipe = r => {
-    setRecipes(rs => [r, ...rs]);
-    goTab('home');
-    flashToast(S.toastAdded);
-  };
-
-  const updateRecipe = r => {
-    setRecipes(rs => rs.map(x => x.id === r.id ? r : x));
-    setEditTarget(null);
-    setSelectedId(r.id);
-    flashToast('Receta actualizada ✓');
-  };
 
   const flashToast = msg => {
     setToast(msg);
     setTimeout(() => setToast(null), 1800);
   };
 
-  useEffect(() => {
-    try { localStorage.setItem('nuestrasRecetas_v1', JSON.stringify(recipes)); } catch {}
-  }, [recipes]);
+  const toggleFav = async (id) => {
+    const r = recipes.find(x => x.id === id);
+    if (!r) return;
+    await updateDoc(doc(col, String(id)), { favourite: !r.favourite });
+    if (!r.favourite) flashToast(S.toastSaved);
+  };
+
+  const onPhotoChange = async (id, dataUrl) => {
+    await updateDoc(doc(col, String(id)), { photo: dataUrl });
+    flashToast(S.toastPhoto);
+  };
+
+  const onAddPhoto = async (id, dataUrl) => {
+    const r = recipes.find(x => x.id === id);
+    await updateDoc(doc(col, String(id)), { photos: [...(r.photos || []), dataUrl] });
+    flashToast(S.toastPhoto);
+  };
+
+  const onRemovePhoto = async (id, idx) => {
+    const r = recipes.find(x => x.id === id);
+    await updateDoc(doc(col, String(id)), { photos: (r.photos || []).filter((_, i) => i !== idx) });
+  };
+
+  const confirmDelete = async () => {
+    await deleteDoc(doc(col, String(deleteTarget.id)));
+    setDeleteTarget(null);
+    setSelectedId(null);
+    flashToast(S.toastDeleted);
+  };
+
+  const addRecipe = async (r) => {
+    await setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
+    goTab('home');
+    flashToast(S.toastAdded);
+  };
+
+  const updateRecipe = async (r) => {
+    await setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
+    setEditTarget(null);
+    setSelectedId(r.id);
+    flashToast('Receta actualizada ✓');
+  };
 
   useEffect(() => {
     document.body.style.background = tok.bg;
@@ -112,7 +127,6 @@ export default function App() {
 
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:16 }}>
-      {/* Palette switcher */}
       {!welcome && (
         <div style={{ display:'flex', gap:8, background:'rgba(255,255,255,0.7)', backdropFilter:'blur(12px)', borderRadius:20, padding:'6px 10px', boxShadow:'0 2px 12px rgba(0,0,0,0.1)' }}>
           {Object.entries(TOKENS).map(([key, val]) => (

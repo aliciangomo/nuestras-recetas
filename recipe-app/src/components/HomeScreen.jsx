@@ -8,7 +8,7 @@ export function HomeScreen({ recipes, onRecipe, accent, screenBg }) {
   const [filter, setFilter] = useState(S.catAll);
   const cats = [S.catAll, ...Array.from(new Set(recipes.map(r => r.category)))];
   const shown = filter === S.catAll ? recipes : recipes.filter(r => r.category === filter);
-  const recent = [...recipes].slice(0, 3);
+  const recent = [...recipes].sort((a, b) => b.id - a.id).slice(0, 3);
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:screenBg }}>
