@@ -4,6 +4,7 @@ import { PillBtn } from './PillBtn.jsx';
 import { I } from '../icons.jsx';
 import { T, FAINT, MUTED, INK } from '../tokens.js';
 import { S } from '../strings.js';
+import { compressFile } from '../compressFile.js';
 
 export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, onPhotoChange, onAddPhoto, onRemovePhoto, onEdit, accent, screenBg }) {
   const [tab, setTab] = useState('ingredients');
@@ -16,16 +17,14 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
 
   const allPhotos = [recipe.photo, ...(recipe.photos || [])].filter(Boolean);
 
-  const handleFile = (e) => {
+  const handleFile = async (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      if (!recipe.photo) onPhotoChange(recipe.id, ev.target.result);
-      else onAddPhoto(recipe.id, ev.target.result);
-    };
-    reader.readAsDataURL(f);
     e.target.value = '';
+    const dataUrl = await compressFile(f);
+    if (!dataUrl) return;
+    if (!recipe.photo) onPhotoChange(recipe.id, dataUrl);
+    else onAddPhoto(recipe.id, dataUrl);
   };
 
   const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };

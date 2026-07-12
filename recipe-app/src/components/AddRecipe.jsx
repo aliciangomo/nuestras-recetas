@@ -3,17 +3,17 @@ import { Photo } from './Photo.jsx';
 import { I } from '../icons.jsx';
 import { T, FAINT, MUTED, INK } from '../tokens.js';
 import { S } from '../strings.js';
+import { compressFile } from '../compressFile.js';
 
 function usePhotoUpload(initial) {
   const [photo, setPhoto] = useState(initial);
   const inputRef = useRef(null);
   const open = () => inputRef.current?.click();
-  const onFile = (e) => {
+  const onFile = async (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    const reader = new FileReader();
-    reader.onload = ev => setPhoto(ev.target.result);
-    reader.readAsDataURL(f);
+    const dataUrl = await compressFile(f);
+    if (dataUrl) setPhoto(dataUrl);
   };
   const input = <input ref={inputRef} type="file" accept="image/*" onChange={onFile} style={{ display:'none' }}/>;
   return { photo, setPhoto, open, input };
@@ -40,13 +40,12 @@ export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, scre
   const baseInput = { width:'100%', border:'none', borderBottom:'1.5px solid ' + FAINT, background:'transparent', padding:'10px 0 8px', ...T.body, fontSize:15, color:INK };
   const lbl = { ...T.label, marginTop:18, marginBottom:0, display:'block' };
 
-  const addExtraPhoto = (e) => {
+  const addExtraPhoto = async (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    const reader = new FileReader();
-    reader.onload = ev => setForm(prev => ({ ...prev, photos: [...prev.photos, ev.target.result] }));
-    reader.readAsDataURL(f);
     e.target.value = '';
+    const dataUrl = await compressFile(f);
+    if (dataUrl) setForm(prev => ({ ...prev, photos: [...prev.photos, dataUrl] }));
   };
 
   const removeExtraPhoto = (idx) => setForm(prev => ({ ...prev, photos: prev.photos.filter((_, i) => i !== idx) }));

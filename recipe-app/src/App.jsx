@@ -17,8 +17,7 @@ import { DeleteSheet } from './components/DeleteSheet.jsx';
 
 export default function App() {
   const [welcome, setWelcome] = useState(true);
-  const [palette, setPalette] = useState('sage');
-  const tok = TOKENS[palette];
+  const tok = TOKENS['sage'];
   const accent = tok.accent;
 
   const [recipes, setRecipes] = useState(null);
@@ -32,19 +31,6 @@ export default function App() {
 
   const col = collection(db, 'recipes');
 
-  const compressPhoto = (dataUrl, maxPx = 640, quality = 0.60) => new Promise(resolve => {
-    const img = new Image();
-    img.onload = () => {
-      const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(img.width * scale);
-      canvas.height = Math.round(img.height * scale);
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL('image/jpeg', quality));
-    };
-    img.onerror = () => resolve(dataUrl);
-    img.src = dataUrl;
-  });
 
   // Real-time sync with Firestore
   useEffect(() => {
@@ -79,15 +65,13 @@ export default function App() {
   };
 
   const onPhotoChange = async (id, dataUrl) => {
-    const compressed = await compressPhoto(dataUrl);
-    await updateDoc(doc(col, String(id)), { photo: compressed });
+    await updateDoc(doc(col, String(id)), { photo: dataUrl });
     flashToast(S.toastPhoto);
   };
 
   const onAddPhoto = async (id, dataUrl) => {
-    const r = recipes.find(x => x.id === id);
-    const compressed = await compressPhoto(dataUrl);
-    await updateDoc(doc(col, String(id)), { photos: [...(r.photos || []), compressed] });
+    const r = recipeList.find(x => x.id === id);
+    await updateDoc(doc(col, String(id)), { photos: [...(r.photos || []), dataUrl] });
     flashToast(S.toastPhoto);
   };
 
@@ -104,17 +88,13 @@ export default function App() {
   };
 
   const addRecipe = async (r) => {
-    const photo = r.photo?.startsWith('data:') ? await compressPhoto(r.photo) : r.photo;
-    const photos = await Promise.all((r.photos || []).map(p => p?.startsWith('data:') ? compressPhoto(p) : p));
-    await setDoc(doc(col, String(r.id)), { ...r, photo, photos });
+    await setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
     goTab('home');
     flashToast(S.toastAdded);
   };
 
   const updateRecipe = async (r) => {
-    const photo = r.photo?.startsWith('data:') ? await compressPhoto(r.photo) : r.photo;
-    const photos = await Promise.all((r.photos || []).map(p => p?.startsWith('data:') ? compressPhoto(p) : p));
-    await setDoc(doc(col, String(r.id)), { ...r, photo, photos });
+    await setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
     setEditTarget(null);
     setSelectedId(r.id);
     flashToast('Receta actualizada ✓');
@@ -164,14 +144,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:16, maxWidth:'100vw', overflow:'hidden' }}>
-      {!welcome && (
-        <div className="palette-picker" style={{ display:'flex', gap:8, background:'rgba(255,255,255,0.7)', backdropFilter:'blur(12px)', borderRadius:20, padding:'6px 10px', boxShadow:'0 2px 12px rgba(0,0,0,0.1)' }}>
-          {Object.entries(TOKENS).map(([key, val]) => (
-            <button key={key} onClick={() => setPalette(key)} style={{ width:22, height:22, borderRadius:'50%', background:val.accent, border:palette === key ? '2.5px solid #fff' : '2px solid transparent', boxShadow:palette === key ? `0 0 0 2px ${val.accent}` : 'none', cursor:'pointer', padding:0, transition:'transform .15s', transform:palette === key ? 'scale(1.15)' : 'scale(1)' }}/>
-          ))}
-        </div>
-      )}
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', maxWidth:'100vw', overflow:'hidden' }}>
 
       <IOSDevice width={390} height={844}>
         <div style={{ position:'absolute', top:0, left:0, right:0, bottom: (!welcome && showNav) ? 84 : 0, overflow:'hidden' }}>
