@@ -33,7 +33,7 @@ export default function App() {
   const seeded = useRef(false);
 
   const col = collection(db, 'recipes');
-
+  const inFlight = useRef(new Set());
 
   // Real-time sync with Firestore
   useEffect(() => {
@@ -47,7 +47,10 @@ export default function App() {
         await batch.commit();
       } else {
         const data = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
-        setRecipes(data);
+        // Preserve optimistic state for any recipe whose write is still in-flight
+        setRecipes(prev => data.map(r =>
+          inFlight.current.has(r.id) ? ((prev || []).find(x => x.id === r.id) || r) : r
+        ));
         // Cache without base64 photos — keeps cache small and write non-blocking
         setTimeout(() => {
           try {
@@ -77,13 +80,19 @@ export default function App() {
     const next = !r.favourite;
     updateLocal(id, { favourite: next });
     if (next) flashToast(S.toastSaved);
-    updateDoc(doc(col, String(id)), { favourite: next });
+    writeDoc(id, () => updateDoc(doc(col, String(id)), { favourite: next }));
+  };
+
+  const writeDoc = (id, op) => {
+    inFlight.current.add(id);
+    op().then(() => inFlight.current.delete(id))
+       .catch(() => { inFlight.current.delete(id); flashToast('Error al guardar — intenta de nuevo'); });
   };
 
   const onPhotoChange = (id, dataUrl) => {
     updateLocal(id, { photo: dataUrl });
     flashToast(S.toastPhoto);
-    updateDoc(doc(col, String(id)), { photo: dataUrl });
+    writeDoc(id, () => updateDoc(doc(col, String(id)), { photo: dataUrl }));
   };
 
   const onAddPhoto = (id, dataUrl) => {
@@ -91,14 +100,14 @@ export default function App() {
     const photos = [...(r.photos || []), dataUrl];
     updateLocal(id, { photos });
     flashToast(S.toastPhoto);
-    updateDoc(doc(col, String(id)), { photos });
+    writeDoc(id, () => updateDoc(doc(col, String(id)), { photos }));
   };
 
   const onRemovePhoto = (id, idx) => {
     const r = recipeList.find(x => x.id === id);
     const photos = (r.photos || []).filter((_, i) => i !== idx);
     updateLocal(id, { photos });
-    updateDoc(doc(col, String(id)), { photos });
+    writeDoc(id, () => updateDoc(doc(col, String(id)), { photos }));
   };
 
   const confirmDelete = async () => {
@@ -113,7 +122,7 @@ export default function App() {
     setRecipes(prev => [...(prev || []), r].sort((a, b) => a.id - b.id));
     goTab('home');
     flashToast(S.toastAdded);
-    setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
+    writeDoc(r.id, () => setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] }));
   };
 
   const updateRecipe = (r) => {
@@ -125,10 +134,10 @@ export default function App() {
     const photosChanged = existing?.photo !== r.photo ||
       JSON.stringify(existing?.photos) !== JSON.stringify(r.photos || []);
     if (photosChanged) {
-      setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
+      writeDoc(r.id, () => setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] }));
     } else {
       const { photo, photos, ...textFields } = r;
-      updateDoc(doc(col, String(r.id)), textFields);
+      writeDoc(r.id, () => updateDoc(doc(col, String(r.id)), textFields));
     }
   };
 

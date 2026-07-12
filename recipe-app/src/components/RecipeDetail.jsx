@@ -11,6 +11,7 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
   const [checked, setChecked] = useState({});
   const [servings, setServings] = useState(recipe.servings);
   const [photoIdx, setPhotoIdx] = useState(0);
+  const [compressing, setCompressing] = useState(false);
   const inputRef = useRef(null);
   const touchStartX = useRef(null);
   const ratio = servings / recipe.servings;
@@ -21,7 +22,9 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
     const f = e.target.files?.[0];
     if (!f) return;
     e.target.value = '';
+    setCompressing(true);
     const dataUrl = await compressFile(f);
+    setCompressing(false);
     if (!dataUrl) return;
     if (!recipe.photo) onPhotoChange(recipe.id, dataUrl);
     else onAddPhoto(recipe.id, dataUrl);
@@ -87,7 +90,11 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
         <div style={{ position:'absolute', top:54, left:14, right:14, display:'flex', justifyContent:'space-between', zIndex:5 }}>
           <PillBtn onClick={onBack}>{I.back({ width:20, height:20 })}</PillBtn>
           <div style={{ display:'flex', gap:8 }}>
-            <PillBtn onClick={() => inputRef.current?.click()}>{I.camera({ width:18, height:18 })}</PillBtn>
+            <PillBtn onClick={() => !compressing && inputRef.current?.click()}>
+              {compressing
+                ? <div style={{ width:14, height:14, border:'2px solid rgba(0,0,0,0.15)', borderTop:'2px solid rgba(0,0,0,0.5)', borderRadius:'50%', animation:'spin 0.8s linear infinite' }}/>
+                : I.camera({ width:18, height:18 })}
+            </PillBtn>
             <PillBtn onClick={() => onEdit(recipe)}>{I.edit({ width:16, height:16 })}</PillBtn>
             <PillBtn onClick={() => onShare(recipe)}>{I.share({ width:17, height:17 })}</PillBtn>
             <PillBtn onClick={() => onToggleFav(recipe.id)} accent={recipe.favourite ? accent : null}>{I.heart(recipe.favourite, { width:18, height:18 })}</PillBtn>

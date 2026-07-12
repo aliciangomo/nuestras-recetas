@@ -16,6 +16,7 @@ input::placeholder,textarea::placeholder{color:rgba(0,0,0,0.25)}
 *{-webkit-tap-highlight-color:transparent}
 input,textarea{outline:none}
 .fade-in{animation:fadeIn .25s ease-out}
+@keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .slide-up{animation:slideUp .26s cubic-bezier(.22,.94,.42,1)}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}

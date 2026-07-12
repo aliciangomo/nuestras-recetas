@@ -7,16 +7,19 @@ import { compressFile } from '../compressFile.js';
 
 function usePhotoUpload(initial) {
   const [photo, setPhoto] = useState(initial);
+  const [compressing, setCompressing] = useState(false);
   const inputRef = useRef(null);
   const open = () => inputRef.current?.click();
   const onFile = async (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
+    setCompressing(true);
     const dataUrl = await compressFile(f);
+    setCompressing(false);
     if (dataUrl) setPhoto(dataUrl);
   };
   const input = <input ref={inputRef} type="file" accept="image/*" onChange={onFile} style={{ display:'none' }}/>;
-  return { photo, setPhoto, open, input };
+  return { photo, setPhoto, open, input, compressing };
 }
 
 export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, screenBg }) {
@@ -34,7 +37,8 @@ export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, scre
     steps: (initialRecipe.steps || []).join('\n'),
     photos: initialRecipe.photos || [],
   } : { title:'', category: S.categories[0], time:'', servings:'', source:'', link:'', note:'', ingredients:'', steps:'', photos:[] });
-  const { photo, setPhoto, open: openPhoto, input: photoInput } = usePhotoUpload(isEdit ? initialRecipe.photo : null);
+  const { photo, setPhoto, open: openPhoto, input: photoInput, compressing: mainCompressing } = usePhotoUpload(isEdit ? initialRecipe.photo : null);
+  const [extraCompressing, setExtraCompressing] = useState(false);
   const extraPhotoRef = useRef(null);
 
   const baseInput = { width:'100%', border:'none', borderBottom:'1.5px solid ' + FAINT, background:'transparent', padding:'10px 0 8px', ...T.body, fontSize:15, color:INK };
@@ -44,14 +48,18 @@ export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, scre
     const f = e.target.files?.[0];
     if (!f) return;
     e.target.value = '';
+    setExtraCompressing(true);
     const dataUrl = await compressFile(f);
+    setExtraCompressing(false);
     if (dataUrl) setForm(prev => ({ ...prev, photos: [...prev.photos, dataUrl] }));
   };
 
   const removeExtraPhoto = (idx) => setForm(prev => ({ ...prev, photos: prev.photos.filter((_, i) => i !== idx) }));
 
+  const compressingAny = mainCompressing || extraCompressing;
+
   const save = async () => {
-    if (!form.title.trim() || saving) return;
+    if (!form.title.trim() || saving || compressingAny) return;
     setSaving(true);
     try {
       const updated = {
@@ -76,7 +84,7 @@ export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, scre
     }
   };
 
-  const valid = form.title.trim().length > 0;
+  const valid = form.title.trim().length > 0 && !compressingAny;
 
   return (
     <div className="fade-in" style={{ height:'100%', display:'flex', flexDirection:'column', background:screenBg }}>
@@ -86,14 +94,19 @@ export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, scre
       <div style={{ padding:'58px 20px 12px', display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 }}>
         <button onClick={onBack} style={{ ...T.body, fontSize:14, color:MUTED, background:'none', border:'none', cursor:'pointer', padding:0 }}>{S.cancel}</button>
         <div style={{ ...T.body, fontSize:15, fontWeight:600 }}>{isEdit ? S.editRecipe : S.newRecipe}</div>
-        <button onClick={save} disabled={!valid || saving} style={{ ...T.body, fontSize:14, fontWeight:600, color:valid && !saving ? accent : '#ccc', background:'none', border:'none', cursor:valid && !saving ? 'pointer' : 'default', padding:0 }}>{saving ? 'Guardando…' : S.save}</button>
+        <button onClick={save} disabled={!valid || saving} style={{ ...T.body, fontSize:14, fontWeight:600, color:valid && !saving ? accent : '#ccc', background:'none', border:'none', cursor:valid && !saving ? 'pointer' : 'default', padding:0 }}>{saving ? 'Guardando…' : compressingAny ? 'Procesando…' : S.save}</button>
       </div>
 
       <div style={{ flex:1, overflowY:'auto', padding:'10px 24px 24px' }}>
         <div>
             {/* Photo uploader */}
             <div onClick={openPhoto} style={{ marginTop:14, height:170, borderRadius:10, overflow:'hidden', position:'relative', cursor:'pointer', background:photo ? '#f0f0f0' : 'transparent', border:photo ? 'none' : '1.5px dashed rgba(0,0,0,0.18)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:8, color:MUTED }}>
-              {photo ? (
+              {mainCompressing ? (
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8, color:MUTED }}>
+                  <div style={{ width:28, height:28, border:'3px solid rgba(0,0,0,0.1)', borderTop:'3px solid ' + MUTED, borderRadius:'50%', animation:'spin 0.8s linear infinite' }}/>
+                  <div style={{ ...T.body, fontSize:13 }}>Procesando foto…</div>
+                </div>
+              ) : photo ? (
                 <>
                   <Photo src={photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
                   <div style={{ position:'absolute', bottom:10, right:10, padding:'7px 14px', borderRadius:18, background:'rgba(0,0,0,0.6)', color:'#fff', ...T.body, fontSize:12, fontWeight:500, display:'flex', alignItems:'center', gap:6, backdropFilter:'blur(6px)' }}>
@@ -167,7 +180,7 @@ export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, scre
             <label style={lbl}>{S.methodLabel} <span style={{ color:'#ccc' }}>· {S.oneStepPerLine}</span></label>
             <textarea style={{ ...baseInput, minHeight:100, padding:'10px 12px', border:'1.5px solid ' + FAINT, borderRadius:6, marginTop:4, resize:'none' }} placeholder={S.methodPlaceholder} value={form.steps} onChange={e => setForm({ ...form, steps:e.target.value })}/>
 
-            <button onClick={save} disabled={!valid || saving} style={{ marginTop:28, width:'100%', padding:'14px 0', borderRadius:8, background:valid && !saving ? accent : '#eee', color:valid && !saving ? '#fff' : '#bbb', border:'none', ...T.body, fontWeight:600, fontSize:14, cursor:valid && !saving ? 'pointer' : 'default' }}>{saving ? 'Guardando…' : S.saveRecipe}</button>
+            <button onClick={save} disabled={!valid || saving} style={{ marginTop:28, width:'100%', padding:'14px 0', borderRadius:8, background:valid && !saving ? accent : '#eee', color:valid && !saving ? '#fff' : '#bbb', border:'none', ...T.body, fontWeight:600, fontSize:14, cursor:valid && !saving ? 'pointer' : 'default' }}>{saving ? 'Guardando…' : compressingAny ? 'Procesando foto…' : S.saveRecipe}</button>
             <div style={{ height:40 }}/>
           </div>
       </div>
