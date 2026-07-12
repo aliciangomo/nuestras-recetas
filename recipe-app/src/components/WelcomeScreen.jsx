@@ -1,27 +1,26 @@
 import { useState } from 'react';
 import { S } from '../strings.js';
 
-// Minimalist white & green kitchen
-const KITCHEN_PHOTO = 'https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=900&q=85&auto=format&fit=crop';
+const KITCHEN_PHOTO = '/welcome.jpg';
 
 export function WelcomeScreen({ onEnter }) {
   const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
-    <div className="fade-in" style={{ height:'100%', position:'relative', overflow:'hidden', background:'#d8e8d8' }}>
-      {/* Kitchen photo */}
+    <div className="fade-in" style={{ height:'100%', position:'relative', overflow:'hidden', background:'#f5ede2' }}>
+      {/* Photo — extended to 76% to give gradient more room */}
       <img
         src={KITCHEN_PHOTO}
         alt="cocina"
         onLoad={() => setImgLoaded(true)}
-        style={{ position:'absolute', inset:0, width:'100%', height:'65%', objectFit:'cover', objectPosition:'center top', display:'block', opacity: imgLoaded ? 1 : 0, transition:'opacity .8s ease' }}
+        style={{ position:'absolute', inset:0, width:'100%', height:'76%', objectFit:'cover', objectPosition:'center top', display:'block', opacity: imgLoaded ? 1 : 0, transition:'opacity .8s ease' }}
       />
 
-      {/* Soft gradient over photo */}
-      <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(255,255,255,0) 30%, rgba(255,255,255,0.92) 60%, #fff 80%)' }}/>
+      {/* Gradient fades photo → warm cream (not white) */}
+      <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(255,255,255,0) 48%, rgba(245,237,226,0.2) 56%, rgba(245,237,226,0.6) 63%, rgba(245,237,226,0.9) 69%, #f5ede2 75%)' }}/>
 
-      {/* Content panel */}
-      <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'0 32px 56px', textAlign:'center' }}>
+      {/* Content panel — reverse gradient: cream at top fading to white */}
+      <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'0 32px 56px', textAlign:'center', background:'linear-gradient(to bottom, #f5ede2 0%, #faf6f0 30%, #fff 60%)' }}>
         {/* Handwritten title — Caveat, same as app headings */}
         <div style={{ fontFamily:'Caveat,cursive', fontWeight:700, fontSize:54, lineHeight:1.05, color:'#2a1f14', marginBottom:6 }}>
           {S.appName}
