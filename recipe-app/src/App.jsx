@@ -32,6 +32,19 @@ export default function App() {
 
   const col = collection(db, 'recipes');
 
+  const compressPhoto = (dataUrl, maxPx = 900, quality = 0.72) => new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  });
+
   // Real-time sync with Firestore
   useEffect(() => {
     const unsub = onSnapshot(col, async (snap) => {
@@ -65,13 +78,15 @@ export default function App() {
   };
 
   const onPhotoChange = async (id, dataUrl) => {
-    await updateDoc(doc(col, String(id)), { photo: dataUrl });
+    const compressed = await compressPhoto(dataUrl);
+    await updateDoc(doc(col, String(id)), { photo: compressed });
     flashToast(S.toastPhoto);
   };
 
   const onAddPhoto = async (id, dataUrl) => {
     const r = recipes.find(x => x.id === id);
-    await updateDoc(doc(col, String(id)), { photos: [...(r.photos || []), dataUrl] });
+    const compressed = await compressPhoto(dataUrl);
+    await updateDoc(doc(col, String(id)), { photos: [...(r.photos || []), compressed] });
     flashToast(S.toastPhoto);
   };
 
@@ -88,13 +103,17 @@ export default function App() {
   };
 
   const addRecipe = async (r) => {
-    await setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
+    const photo = r.photo?.startsWith('data:') ? await compressPhoto(r.photo) : r.photo;
+    const photos = await Promise.all((r.photos || []).map(p => p?.startsWith('data:') ? compressPhoto(p) : p));
+    await setDoc(doc(col, String(r.id)), { ...r, photo, photos });
     goTab('home');
     flashToast(S.toastAdded);
   };
 
   const updateRecipe = async (r) => {
-    await setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
+    const photo = r.photo?.startsWith('data:') ? await compressPhoto(r.photo) : r.photo;
+    const photos = await Promise.all((r.photos || []).map(p => p?.startsWith('data:') ? compressPhoto(p) : p));
+    await setDoc(doc(col, String(r.id)), { ...r, photo, photos });
     setEditTarget(null);
     setSelectedId(r.id);
     flashToast('Receta actualizada ✓');
