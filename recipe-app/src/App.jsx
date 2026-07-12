@@ -68,55 +68,68 @@ export default function App() {
     setTimeout(() => setToast(null), 1800);
   };
 
-  const toggleFav = async (id) => {
-    const r = recipes.find(x => x.id === id);
-    if (!r) return;
-    await updateDoc(doc(col, String(id)), { favourite: !r.favourite });
-    if (!r.favourite) flashToast(S.toastSaved);
-  };
+  const updateLocal = (id, patch) =>
+    setRecipes(prev => (prev || []).map(r => r.id === id ? { ...r, ...patch } : r));
 
-  const onPhotoChange = async (id, dataUrl) => {
-    await updateDoc(doc(col, String(id)), { photo: dataUrl });
-    flashToast(S.toastPhoto);
-  };
-
-  const onAddPhoto = async (id, dataUrl) => {
+  const toggleFav = (id) => {
     const r = recipeList.find(x => x.id === id);
-    await updateDoc(doc(col, String(id)), { photos: [...(r.photos || []), dataUrl] });
-    flashToast(S.toastPhoto);
+    if (!r) return;
+    const next = !r.favourite;
+    updateLocal(id, { favourite: next });
+    if (next) flashToast(S.toastSaved);
+    updateDoc(doc(col, String(id)), { favourite: next });
   };
 
-  const onRemovePhoto = async (id, idx) => {
-    const r = recipes.find(x => x.id === id);
-    await updateDoc(doc(col, String(id)), { photos: (r.photos || []).filter((_, i) => i !== idx) });
+  const onPhotoChange = (id, dataUrl) => {
+    updateLocal(id, { photo: dataUrl });
+    flashToast(S.toastPhoto);
+    updateDoc(doc(col, String(id)), { photo: dataUrl });
+  };
+
+  const onAddPhoto = (id, dataUrl) => {
+    const r = recipeList.find(x => x.id === id);
+    const photos = [...(r.photos || []), dataUrl];
+    updateLocal(id, { photos });
+    flashToast(S.toastPhoto);
+    updateDoc(doc(col, String(id)), { photos });
+  };
+
+  const onRemovePhoto = (id, idx) => {
+    const r = recipeList.find(x => x.id === id);
+    const photos = (r.photos || []).filter((_, i) => i !== idx);
+    updateLocal(id, { photos });
+    updateDoc(doc(col, String(id)), { photos });
   };
 
   const confirmDelete = async () => {
-    await deleteDoc(doc(col, String(deleteTarget.id)));
+    const id = deleteTarget.id;
     setDeleteTarget(null);
     setSelectedId(null);
     flashToast(S.toastDeleted);
+    await deleteDoc(doc(col, String(id)));
   };
 
-  const addRecipe = async (r) => {
-    await setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
+  const addRecipe = (r) => {
+    setRecipes(prev => [...(prev || []), r].sort((a, b) => a.id - b.id));
     goTab('home');
     flashToast(S.toastAdded);
+    setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
   };
 
-  const updateRecipe = async (r) => {
+  const updateRecipe = (r) => {
+    updateLocal(r.id, r);
+    setEditTarget(null);
+    setSelectedId(r.id);
+    flashToast('Receta actualizada ✓');
     const existing = recipeList.find(x => x.id === r.id);
     const photosChanged = existing?.photo !== r.photo ||
       JSON.stringify(existing?.photos) !== JSON.stringify(r.photos || []);
     if (photosChanged) {
-      await setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
+      setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
     } else {
       const { photo, photos, ...textFields } = r;
-      await updateDoc(doc(col, String(r.id)), textFields);
+      updateDoc(doc(col, String(r.id)), textFields);
     }
-    setEditTarget(null);
-    setSelectedId(r.id);
-    flashToast('Receta actualizada ✓');
   };
 
   useEffect(() => {
