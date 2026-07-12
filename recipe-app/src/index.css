@@ -8,6 +8,8 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 input,textarea,select,button{font-family:inherit}
+/* Prevent iOS auto-zoom on input focus (requires font-size >= 16px) */
+input,textarea,select{font-size:16px !important}
 ::-webkit-scrollbar{width:0;height:0}
 input::placeholder,textarea::placeholder{color:rgba(0,0,0,0.25)}
 *{-webkit-tap-highlight-color:transparent}
@@ -16,3 +18,15 @@ input,textarea{outline:none}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .slide-up{animation:slideUp .26s cubic-bezier(.22,.94,.42,1)}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+/* On real mobile: fill the screen, hide desktop phone frame chrome */
+@media (max-width: 480px) {
+  body{display:block;min-height:100dvh;padding:0}
+  .ios-device{
+    width:100vw !important;
+    height:100dvh !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+  }
+  .ios-notch,.ios-home-indicator{display:none}
+}

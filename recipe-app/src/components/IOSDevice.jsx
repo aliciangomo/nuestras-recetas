@@ -16,11 +16,11 @@ export function IOSStatusBar({ time = '9:41' }) {
 
 export function IOSDevice({ children, width = 390, height = 844 }) {
   return (
-    <div style={{ width, height, borderRadius:48, overflow:'hidden', position:'relative', background:'#fff', boxShadow:'0 30px 70px rgba(50,70,40,0.22),0 0 0 1px rgba(0,0,0,0.08)' }}>
-      <div style={{ position:'absolute', top:11, left:'50%', transform:'translateX(-50%)', width:126, height:37, borderRadius:24, background:'#000', zIndex:50 }}/>
+    <div className="ios-device" style={{ width, height, borderRadius:48, overflow:'hidden', position:'relative', background:'#fff', boxShadow:'0 30px 70px rgba(50,70,40,0.22),0 0 0 1px rgba(0,0,0,0.08)' }}>
+      <div className="ios-notch" style={{ position:'absolute', top:11, left:'50%', transform:'translateX(-50%)', width:126, height:37, borderRadius:24, background:'#000', zIndex:50 }}/>
       <IOSStatusBar/>
       <div style={{ position:'absolute', top:0, left:0, right:0, bottom:0 }}>{children}</div>
-      <div style={{ position:'absolute', bottom:8, left:'50%', transform:'translateX(-50%)', width:139, height:5, borderRadius:100, background:'rgba(0,0,0,0.2)', zIndex:200, pointerEvents:'none' }}/>
+      <div className="ios-home-indicator" style={{ position:'absolute', bottom:8, left:'50%', transform:'translateX(-50%)', width:139, height:5, borderRadius:100, background:'rgba(0,0,0,0.2)', zIndex:200, pointerEvents:'none' }}/>
     </div>
   );
 }
