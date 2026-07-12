@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
 import { db } from './firebase.js';
 import { TOKENS, T } from './tokens.js';
 import { INITIAL_RECIPES } from './data.js';
@@ -39,16 +39,21 @@ export default function App() {
   useEffect(() => {
     const unsub = onSnapshot(col, async (snap) => {
       if (snap.empty && !seeded.current) {
-        // Guard: if we've ever had real data, a momentary empty snapshot is a
-        // network blip — do NOT re-seed or we'll overwrite the user's recipes.
-        if (localStorage.getItem('recetas_seeded')) return;
         seeded.current = true;
-        localStorage.setItem('recetas_seeded', '1');
+        // Check a Firestore sentinel before seeding — this survives reinstalls
+        // and is shared across all family devices, so only one device ever seeds.
+        const sentinel = doc(db, '_meta', 'seeded');
+        try {
+          const s = await getDoc(sentinel);
+          if (s.exists()) return; // already seeded on another device/session
+        } catch { return; } // can't read Firestore — don't seed
         const batch = writeBatch(db);
+        batch.set(sentinel, { at: Date.now() });
         INITIAL_RECIPES.forEach(r => {
           batch.set(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
         });
         await batch.commit();
+        localStorage.setItem('recetas_seeded', '1');
       } else if (!snap.empty) {
         // Mark as seeded so we never accidentally re-seed on this device
         if (!localStorage.getItem('recetas_seeded')) {
