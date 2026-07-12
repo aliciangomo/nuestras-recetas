@@ -1,6 +1,7 @@
 import { Photo } from './Photo.jsx';
 import { I } from '../icons.jsx';
 import { T, FAINT, MUTED } from '../tokens.js';
+import { S } from '../strings.js';
 
 export function SavedScreen({ recipes, onRecipe, accent, screenBg }) {
   const favs = recipes.filter(r => r.favourite);
@@ -8,15 +9,15 @@ export function SavedScreen({ recipes, onRecipe, accent, screenBg }) {
   return (
     <div className="fade-in" style={{ height:'100%', display:'flex', flexDirection:'column', background:screenBg }}>
       <div style={{ padding:'68px 24px 14px', flexShrink:0 }}>
-        <div style={{ ...T.label, color:accent }}>made with love</div>
-        <div style={{ ...T.cursive, fontSize:34, lineHeight:1, marginTop:6 }}>Saved Recipes</div>
-        <div style={{ ...T.meta, marginTop:4 }}>{favs.length} favourites</div>
+        <div style={{ ...T.label, color:accent }}>{S.savedTagline}</div>
+        <div style={{ ...T.cursive, fontSize:34, lineHeight:1, marginTop:6 }}>{S.savedTitle}</div>
+        <div style={{ ...T.meta, marginTop:4 }}>{S.favCount(favs.length)}</div>
       </div>
       <div style={{ height:1, background:FAINT, flexShrink:0 }}/>
       <div style={{ flex:1, overflowY:'auto', paddingBottom:8 }}>
         {favs.length === 0 ? (
           <div style={{ padding:'60px 32px', textAlign:'center' }}>
-            <div style={{ ...T.serif, fontStyle:'italic', color:MUTED, lineHeight:1.6 }}>No saved recipes yet.<br/>Tap ♡ on any recipe to add it here.</div>
+            <div style={{ ...T.serif, fontStyle:'italic', color:MUTED, lineHeight:1.6 }}>{S.noSaved}</div>
           </div>
         ) : (
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, padding:'18px 20px' }}>

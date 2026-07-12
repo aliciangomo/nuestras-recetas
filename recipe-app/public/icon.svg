@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="#fdf8f0"/>
+
+  <!-- Chef hat — tall white toque -->
+  <!-- Hat brim -->
+  <rect x="148" y="230" width="216" height="40" rx="14" fill="#ffffff" stroke="#ddd0c0" stroke-width="3"/>
+  <!-- Hat body -->
+  <rect x="172" y="96" width="168" height="148" rx="12" fill="#ffffff" stroke="#ddd0c0" stroke-width="3"/>
+  <!-- Hat puff / top balloon -->
+  <ellipse cx="256" cy="96" rx="96" ry="56" fill="#ffffff" stroke="#ddd0c0" stroke-width="3"/>
+  <!-- Small heart on hat -->
+  <path d="M256 68 c-2-5-7-5-9-2.5 -4 2.5-4 7.5 0 12l9 9 9-9c4-4.5 4-9.5 0-12 -2-2.5-7-2.5-9 2.5z" fill="#e87878" opacity="0.85"/>
+
+  <!-- Face -->
+  <circle cx="256" cy="330" r="112" fill="#f8c8a0"/>
+  <!-- Face shadow / depth -->
+  <ellipse cx="256" cy="370" rx="80" ry="40" fill="rgba(0,0,0,0.06)"/>
+
+  <!-- Eyes — big and friendly -->
+  <circle cx="218" cy="308" r="16" fill="#2a1a0a"/>
+  <circle cx="294" cy="308" r="16" fill="#2a1a0a"/>
+  <!-- Eye shine -->
+  <circle cx="224" cy="300" r="6" fill="#fff"/>
+  <circle cx="300" cy="300" r="6" fill="#fff"/>
+
+  <!-- Eyebrows — raised and happy -->
+  <path d="M200 282 Q218 270 236 278" stroke="#7a5030" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <path d="M276 278 Q294 270 312 282" stroke="#7a5030" stroke-width="8" stroke-linecap="round" fill="none"/>
+
+  <!-- Big smile -->
+  <path d="M210 352 Q256 400 302 352" stroke="#7a4020" stroke-width="9" stroke-linecap="round" fill="none"/>
+
+  <!-- Rosy cheeks -->
+  <ellipse cx="188" cy="348" rx="32" ry="20" fill="#f09090" opacity="0.35"/>
+  <ellipse cx="324" cy="348" rx="32" ry="20" fill="#f09090" opacity="0.35"/>
+
+  <!-- Chef coat collar + body -->
+  <path d="M144 450 Q180 420 220 428 L256 442 L292 428 Q332 420 368 450 L380 512 L132 512 Z" fill="#fff" stroke="#ddd0c0" stroke-width="3"/>
+  <!-- Coat buttons -->
+  <circle cx="256" cy="468" r="7" fill="#ddd0c0"/>
+  <circle cx="256" cy="492" r="7" fill="#ddd0c0"/>
+
+  <!-- Wooden spoon held up on right side -->
+  <g transform="rotate(-30, 360, 380)">
+    <rect x="355" y="280" width="14" height="90" rx="7" fill="#c8a060"/>
+    <ellipse cx="362" cy="278" rx="18" ry="24" fill="#c8a060" stroke="#b08040" stroke-width="2"/>
+  </g>
+</svg>

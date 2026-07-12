@@ -3,6 +3,7 @@ import { Photo } from './Photo.jsx';
 import { PillBtn } from './PillBtn.jsx';
 import { I } from '../icons.jsx';
 import { T, FAINT, MUTED, INK } from '../tokens.js';
+import { S } from '../strings.js';
 
 export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, onPhotoChange, accent, screenBg }) {
   const [tab, setTab] = useState('ingredients');
@@ -63,14 +64,14 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
             <button onClick={() => setServings(Math.max(1, servings - 1))} style={{ width:22, height:22, borderRadius:11, border:'1px solid ' + FAINT, background:'#fff', color:INK, cursor:'pointer', fontSize:13, lineHeight:1, padding:0 }}>−</button>
             <span style={{ ...T.body, fontSize:13, fontWeight:500, minWidth:18, textAlign:'center' }}>{servings}</span>
             <button onClick={() => setServings(servings + 1)} style={{ width:22, height:22, borderRadius:11, border:'1px solid ' + FAINT, background:'#fff', color:INK, cursor:'pointer', fontSize:13, lineHeight:1, padding:0 }}>+</button>
-            <span style={{ ...T.meta }}>servings</span>
+            <span style={{ ...T.meta }}>{S.servings}</span>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <div style={{ display:'flex', borderBottom:'1px solid ' + FAINT, padding:'0 24px', gap:24, flexShrink:0 }}>
-        {[['ingredients','Ingredients', recipe.ingredients.length], ['method','Method', recipe.steps.length]].map(([id, label, n]) => {
+        {[['ingredients', S.ingredients, recipe.ingredients.length], ['method', S.method, recipe.steps.length]].map(([id, label, n]) => {
           const active = tab === id;
           return (
             <button key={id} onClick={() => setTab(id)} style={{ ...T.body, fontSize:14, fontWeight:600, padding:'10px 0 12px', background:'none', border:'none', borderBottom:active ? `2px solid ${accent}` : '2px solid transparent', color:active ? accent : '#bbb', cursor:'pointer', marginBottom:-1, display:'flex', alignItems:'center', gap:6 }}>
@@ -92,7 +93,7 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
                 <span style={{ ...T.serif, fontSize:14.5, lineHeight:1.55, textDecoration:checked[i] ? 'line-through' : 'none' }}>{scaleIngredient(ing)}</span>
               </div>
             ))}
-            <div style={{ ...T.meta, fontSize:11, fontStyle:'italic', marginTop:14 }}>tap to check off as you go</div>
+            <div style={{ ...T.meta, fontSize:11, fontStyle:'italic', marginTop:14 }}>{S.tapToCheck}</div>
           </div>
         ) : (
           <div className="fade-in">
@@ -107,8 +108,8 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
           </div>
         )}
         <div style={{ marginTop:18, paddingTop:16, borderTop:'1px solid ' + FAINT, ...T.meta, fontSize:11, fontStyle:'italic', display:'flex', justifyContent:'space-between' }}>
-          <span>From: {recipe.source}</span>
-          <span>♡ Favourite this</span>
+          <span>{S.from}{recipe.source}</span>
+          <span>{S.favouriteThis}</span>
         </div>
       </div>
     </div>

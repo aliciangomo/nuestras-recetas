@@ -1,12 +1,13 @@
 import { I } from '../icons.jsx';
 import { T } from '../tokens.js';
+import { S } from '../strings.js';
 
 export function BottomNav({ tab, onTab, accent, screenBg }) {
   const items = [
-    { id:'home',   label:'Recipes', ico: I.book },
-    { id:'search', label:'Search',  ico: I.search },
-    { id:'add',    label:'Add',     ico: I.plus },
-    { id:'saved',  label:'Saved',   ico: p => I.heart(tab === 'saved', p) },
+    { id:'home',   label: S.navRecipes, ico: I.book },
+    { id:'search', label: S.navSearch,  ico: I.search },
+    { id:'add',    label: S.navAdd,     ico: I.plus },
+    { id:'saved',  label: S.navSaved,   ico: p => I.heart(tab === 'saved', p) },
   ];
 
   return (

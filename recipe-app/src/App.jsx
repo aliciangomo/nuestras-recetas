@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { TOKENS, T } from './tokens.js';
 import { INITIAL_RECIPES } from './data.js';
+import { S } from './strings.js';
 import { IOSDevice } from './components/IOSDevice.jsx';
 import { BottomNav } from './components/BottomNav.jsx';
+import { WelcomeScreen } from './components/WelcomeScreen.jsx';
 import { HomeScreen } from './components/HomeScreen.jsx';
 import { RecipeDetail } from './components/RecipeDetail.jsx';
 import { AddRecipe } from './components/AddRecipe.jsx';
@@ -12,6 +14,7 @@ import { ShareSheet } from './components/ShareSheet.jsx';
 import { DeleteSheet } from './components/DeleteSheet.jsx';
 
 export default function App() {
+  const [welcome, setWelcome] = useState(true);
   const [palette, setPalette] = useState('sage');
   const tok = TOKENS[palette];
   const accent = tok.accent;
@@ -30,25 +33,25 @@ export default function App() {
   const toggleFav = id => {
     setRecipes(rs => rs.map(r => r.id === id ? { ...r, favourite: !r.favourite } : r));
     const r = recipes.find(x => x.id === id);
-    if (r && !r.favourite) flashToast('Added to Saved ♡');
+    if (r && !r.favourite) flashToast(S.toastSaved);
   };
 
   const onPhotoChange = (id, dataUrl) => {
     setRecipes(rs => rs.map(r => r.id === id ? { ...r, photo: dataUrl } : r));
-    flashToast('Photo updated');
+    flashToast(S.toastPhoto);
   };
 
   const confirmDelete = () => {
     setRecipes(rs => rs.filter(r => r.id !== deleteTarget.id));
     setDeleteTarget(null);
     setSelectedId(null);
-    flashToast('Recipe deleted');
+    flashToast(S.toastDeleted);
   };
 
   const addRecipe = r => {
     setRecipes(rs => [r, ...rs]);
     goTab('home');
-    flashToast('Recipe added');
+    flashToast(S.toastAdded);
   };
 
   const flashToast = msg => {
@@ -65,7 +68,9 @@ export default function App() {
   const screenBg = tok.screen;
 
   let main = null;
-  if (selected) {
+  if (welcome) {
+    main = <WelcomeScreen onEnter={() => setWelcome(false)}/>;
+  } else if (selected) {
     main = <RecipeDetail recipe={selected} onBack={() => setSelectedId(null)} onToggleFav={toggleFav} onDelete={r => setDeleteTarget(r)} onShare={r => setShareTarget(r)} onPhotoChange={onPhotoChange} accent={accent} screenBg={screenBg}/>;
   } else if (tab === 'home') {
     main = <HomeScreen recipes={recipes} onRecipe={setSelectedId} accent={accent} screenBg={screenBg}/>;
@@ -80,17 +85,19 @@ export default function App() {
   return (
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:16 }}>
       {/* Palette switcher */}
-      <div style={{ display:'flex', gap:8, background:'rgba(255,255,255,0.7)', backdropFilter:'blur(12px)', borderRadius:20, padding:'6px 10px', boxShadow:'0 2px 12px rgba(0,0,0,0.1)' }}>
-        {Object.entries(TOKENS).map(([key, val]) => (
-          <button key={key} onClick={() => setPalette(key)} style={{ width:22, height:22, borderRadius:'50%', background:val.accent, border:palette === key ? '2.5px solid #fff' : '2px solid transparent', boxShadow:palette === key ? `0 0 0 2px ${val.accent}` : 'none', cursor:'pointer', padding:0, transition:'transform .15s', transform:palette === key ? 'scale(1.15)' : 'scale(1)' }}/>
-        ))}
-      </div>
+      {!welcome && (
+        <div style={{ display:'flex', gap:8, background:'rgba(255,255,255,0.7)', backdropFilter:'blur(12px)', borderRadius:20, padding:'6px 10px', boxShadow:'0 2px 12px rgba(0,0,0,0.1)' }}>
+          {Object.entries(TOKENS).map(([key, val]) => (
+            <button key={key} onClick={() => setPalette(key)} style={{ width:22, height:22, borderRadius:'50%', background:val.accent, border:palette === key ? '2.5px solid #fff' : '2px solid transparent', boxShadow:palette === key ? `0 0 0 2px ${val.accent}` : 'none', cursor:'pointer', padding:0, transition:'transform .15s', transform:palette === key ? 'scale(1.15)' : 'scale(1)' }}/>
+          ))}
+        </div>
+      )}
 
       <IOSDevice width={390} height={844}>
-        <div style={{ position:'absolute', top:0, left:0, right:0, bottom:showNav ? 84 : 0, overflow:'hidden' }}>
+        <div style={{ position:'absolute', top:0, left:0, right:0, bottom: (!welcome && showNav) ? 84 : 0, overflow:'hidden' }}>
           {main}
         </div>
-        {showNav && <BottomNav tab={tab} onTab={goTab} accent={accent} screenBg={screenBg}/>}
+        {!welcome && showNav && <BottomNav tab={tab} onTab={goTab} accent={accent} screenBg={screenBg}/>}
         {shareTarget && <ShareSheet recipe={shareTarget} onClose={() => setShareTarget(null)} accent={accent} palette={tok}/>}
         {deleteTarget && <DeleteSheet recipe={deleteTarget} onConfirm={confirmDelete} onCancel={() => setDeleteTarget(null)}/>}
         {toast && (

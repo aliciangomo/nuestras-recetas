@@ -1,0 +1,13 @@
+{
+  "name": "Nuestras Recetas",
+  "short_name": "Recetas",
+  "description": "Las recetas de nuestra familia",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdf8f0",
+  "theme_color": "#5b7b62",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
