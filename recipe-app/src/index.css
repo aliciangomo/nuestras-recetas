@@ -1,5 +1,5 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
+html,body{height:100%;overflow-x:hidden}
 body{
   background:#dde7d8;
   background-image:radial-gradient(ellipse at 30% 20%,#e6eee0 0%,#dde7d8 60%);
@@ -22,12 +22,12 @@ input,textarea{outline:none}
 
 /* On real mobile: fill the screen, hide desktop phone frame chrome */
 @media (max-width: 480px) {
-  body{display:block;min-height:100dvh;padding:0}
+  body{display:block;min-height:100dvh;padding:0;overflow-x:hidden}
   .ios-device{
     width:100vw !important;
     height:100dvh !important;
     border-radius:0 !important;
     box-shadow:none !important;
   }
-  .ios-notch,.ios-home-indicator{display:none}
+  .ios-notch,.ios-home-indicator,.palette-picker{display:none !important}
 }

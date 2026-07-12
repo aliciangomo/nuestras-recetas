@@ -21,7 +21,7 @@ export default function App() {
   const tok = TOKENS[palette];
   const accent = tok.accent;
 
-  const [recipes, setRecipes] = useState([]);
+  const [recipes, setRecipes] = useState(null);
   const [tab, setTab] = useState('home');
   const [selectedId, setSelectedId] = useState(null);
   const [shareTarget, setShareTarget] = useState(null);
@@ -63,7 +63,7 @@ export default function App() {
     return unsub;
   }, []);
 
-  const selected = selectedId != null ? recipes.find(r => r.id === selectedId) : null;
+  const selected = selectedId != null ? (recipes || []).find(r => r.id === selectedId) : null;
   const goTab = t => { setSelectedId(null); setTab(t); };
 
   const flashToast = msg => {
@@ -127,28 +127,46 @@ export default function App() {
 
   const showNav = !selected && tab !== 'add' && !editTarget;
   const screenBg = tok.screen;
+  const loading = recipes === null;
+  const recipeList = recipes || [];
+
+  const skeleton = (
+    <div style={{ height:'100%', background:screenBg, padding:'68px 24px 24px' }}>
+      {[180, 140, 160, 140, 160].map((w, i) => (
+        <div key={i} style={{ display:'flex', alignItems:'center', gap:14, padding:'12px 0', borderBottom:'1px solid rgba(0,0,0,0.06)' }}>
+          <div style={{ flex:1 }}>
+            <div style={{ height:18, width:w, borderRadius:6, background:'rgba(0,0,0,0.08)', marginBottom:8 }}/>
+            <div style={{ height:12, width:100, borderRadius:6, background:'rgba(0,0,0,0.05)' }}/>
+          </div>
+          <div style={{ width:64, height:64, borderRadius:8, background:'rgba(0,0,0,0.08)', flexShrink:0 }}/>
+        </div>
+      ))}
+    </div>
+  );
 
   let main = null;
   if (welcome) {
     main = <WelcomeScreen onEnter={() => setWelcome(false)}/>;
+  } else if (loading) {
+    main = skeleton;
   } else if (editTarget) {
     main = <AddRecipe initialRecipe={editTarget} onBack={() => { setEditTarget(null); setSelectedId(editTarget.id); }} onUpdate={updateRecipe} onAdd={addRecipe} accent={accent} screenBg={screenBg}/>;
   } else if (selected) {
     main = <RecipeDetail recipe={selected} onBack={() => setSelectedId(null)} onToggleFav={toggleFav} onDelete={r => setDeleteTarget(r)} onShare={r => setShareTarget(r)} onPhotoChange={onPhotoChange} onAddPhoto={onAddPhoto} onRemovePhoto={onRemovePhoto} onEdit={r => setEditTarget(r)} accent={accent} screenBg={screenBg}/>;
   } else if (tab === 'home') {
-    main = <HomeScreen recipes={recipes} onRecipe={setSelectedId} accent={accent} screenBg={screenBg}/>;
+    main = <HomeScreen recipes={recipeList} onRecipe={setSelectedId} accent={accent} screenBg={screenBg}/>;
   } else if (tab === 'search') {
-    main = <SearchScreen recipes={recipes} onRecipe={setSelectedId} accent={accent} screenBg={screenBg} palette={tok}/>;
+    main = <SearchScreen recipes={recipeList} onRecipe={setSelectedId} accent={accent} screenBg={screenBg} palette={tok}/>;
   } else if (tab === 'saved') {
-    main = <SavedScreen recipes={recipes} onRecipe={setSelectedId} accent={accent} screenBg={screenBg}/>;
+    main = <SavedScreen recipes={recipeList} onRecipe={setSelectedId} accent={accent} screenBg={screenBg}/>;
   } else if (tab === 'add') {
     main = <AddRecipe onBack={() => goTab('home')} onAdd={addRecipe} accent={accent} screenBg={screenBg}/>;
   }
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:16 }}>
+    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:16, maxWidth:'100vw', overflow:'hidden' }}>
       {!welcome && (
-        <div style={{ display:'flex', gap:8, background:'rgba(255,255,255,0.7)', backdropFilter:'blur(12px)', borderRadius:20, padding:'6px 10px', boxShadow:'0 2px 12px rgba(0,0,0,0.1)' }}>
+        <div className="palette-picker" style={{ display:'flex', gap:8, background:'rgba(255,255,255,0.7)', backdropFilter:'blur(12px)', borderRadius:20, padding:'6px 10px', boxShadow:'0 2px 12px rgba(0,0,0,0.1)' }}>
           {Object.entries(TOKENS).map(([key, val]) => (
             <button key={key} onClick={() => setPalette(key)} style={{ width:22, height:22, borderRadius:'50%', background:val.accent, border:palette === key ? '2.5px solid #fff' : '2px solid transparent', boxShadow:palette === key ? `0 0 0 2px ${val.accent}` : 'none', cursor:'pointer', padding:0, transition:'transform .15s', transform:palette === key ? 'scale(1.15)' : 'scale(1)' }}/>
           ))}
