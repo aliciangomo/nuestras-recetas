@@ -32,7 +32,7 @@ export default function App() {
 
   const col = collection(db, 'recipes');
 
-  const compressPhoto = (dataUrl, maxPx = 900, quality = 0.72) => new Promise(resolve => {
+  const compressPhoto = (dataUrl, maxPx = 640, quality = 0.60) => new Promise(resolve => {
     const img = new Image();
     img.onload = () => {
       const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
@@ -42,6 +42,7 @@ export default function App() {
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
       resolve(canvas.toDataURL('image/jpeg', quality));
     };
+    img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
   });
 

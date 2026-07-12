@@ -21,6 +21,7 @@ function usePhotoUpload(initial) {
 
 export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, screenBg }) {
   const isEdit = !!initialRecipe;
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(() => isEdit ? {
     title: initialRecipe.title,
     category: initialRecipe.category,
@@ -50,25 +51,30 @@ export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, scre
 
   const removeExtraPhoto = (idx) => setForm(prev => ({ ...prev, photos: prev.photos.filter((_, i) => i !== idx) }));
 
-  const save = () => {
-    if (!form.title.trim()) return;
-    const updated = {
-      id: isEdit ? initialRecipe.id : Date.now(),
-      title: form.title.trim(),
-      category: form.category,
-      time: form.time || '?',
-      servings: parseInt(form.servings) || 4,
-      favourite: isEdit ? initialRecipe.favourite : false,
-      photo,
-      photos: form.photos,
-      source: form.source || 'Tú · hoy',
-      link: form.link.trim() || null,
-      note: form.note || '',
-      ingredients: form.ingredients.split('\n').map(s => s.trim()).filter(Boolean),
-      steps: form.steps.split('\n').map(s => s.trim()).filter(Boolean),
-    };
-    if (isEdit) onUpdate(updated);
-    else onAdd(updated);
+  const save = async () => {
+    if (!form.title.trim() || saving) return;
+    setSaving(true);
+    try {
+      const updated = {
+        id: isEdit ? initialRecipe.id : Date.now(),
+        title: form.title.trim(),
+        category: form.category,
+        time: form.time || '?',
+        servings: parseInt(form.servings) || 4,
+        favourite: isEdit ? initialRecipe.favourite : false,
+        photo,
+        photos: form.photos,
+        source: form.source || 'Tú · hoy',
+        link: form.link.trim() || null,
+        note: form.note || '',
+        ingredients: form.ingredients.split('\n').map(s => s.trim()).filter(Boolean),
+        steps: form.steps.split('\n').map(s => s.trim()).filter(Boolean),
+      };
+      if (isEdit) await onUpdate(updated);
+      else await onAdd(updated);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const valid = form.title.trim().length > 0;
@@ -81,7 +87,7 @@ export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, scre
       <div style={{ padding:'58px 20px 12px', display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 }}>
         <button onClick={onBack} style={{ ...T.body, fontSize:14, color:MUTED, background:'none', border:'none', cursor:'pointer', padding:0 }}>{S.cancel}</button>
         <div style={{ ...T.body, fontSize:15, fontWeight:600 }}>{isEdit ? S.editRecipe : S.newRecipe}</div>
-        <button onClick={save} disabled={!valid} style={{ ...T.body, fontSize:14, fontWeight:600, color:valid ? accent : '#ccc', background:'none', border:'none', cursor:valid ? 'pointer' : 'default', padding:0 }}>{S.save}</button>
+        <button onClick={save} disabled={!valid || saving} style={{ ...T.body, fontSize:14, fontWeight:600, color:valid && !saving ? accent : '#ccc', background:'none', border:'none', cursor:valid && !saving ? 'pointer' : 'default', padding:0 }}>{saving ? 'Guardando…' : S.save}</button>
       </div>
 
       <div style={{ flex:1, overflowY:'auto', padding:'10px 24px 24px' }}>
@@ -162,7 +168,7 @@ export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, scre
             <label style={lbl}>{S.methodLabel} <span style={{ color:'#ccc' }}>· {S.oneStepPerLine}</span></label>
             <textarea style={{ ...baseInput, minHeight:100, padding:'10px 12px', border:'1.5px solid ' + FAINT, borderRadius:6, marginTop:4, resize:'none' }} placeholder={S.methodPlaceholder} value={form.steps} onChange={e => setForm({ ...form, steps:e.target.value })}/>
 
-            <button onClick={save} disabled={!valid} style={{ marginTop:28, width:'100%', padding:'14px 0', borderRadius:8, background:valid ? accent : '#eee', color:valid ? '#fff' : '#bbb', border:'none', ...T.body, fontWeight:600, fontSize:14, cursor:valid ? 'pointer' : 'default' }}>{S.saveRecipe}</button>
+            <button onClick={save} disabled={!valid || saving} style={{ marginTop:28, width:'100%', padding:'14px 0', borderRadius:8, background:valid && !saving ? accent : '#eee', color:valid && !saving ? '#fff' : '#bbb', border:'none', ...T.body, fontWeight:600, fontSize:14, cursor:valid && !saving ? 'pointer' : 'default' }}>{saving ? 'Guardando…' : S.saveRecipe}</button>
             <div style={{ height:40 }}/>
           </div>
       </div>
