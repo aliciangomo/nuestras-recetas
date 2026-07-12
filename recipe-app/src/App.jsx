@@ -20,7 +20,10 @@ export default function App() {
   const tok = TOKENS['sage'];
   const accent = tok.accent;
 
-  const [recipes, setRecipes] = useState(null);
+  const [recipes, setRecipes] = useState(() => {
+    try { const c = localStorage.getItem('recetas_cache'); return c ? JSON.parse(c) : null; }
+    catch { return null; }
+  });
   const [tab, setTab] = useState('home');
   const [selectedId, setSelectedId] = useState(null);
   const [shareTarget, setShareTarget] = useState(null);
@@ -43,7 +46,9 @@ export default function App() {
         });
         await batch.commit();
       } else {
-        setRecipes(snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id));
+        const data = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        setRecipes(data);
+        try { localStorage.setItem('recetas_cache', JSON.stringify(data)); } catch {}
       }
     });
     return unsub;
