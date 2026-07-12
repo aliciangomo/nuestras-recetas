@@ -102,7 +102,12 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
       {/* Title block */}
       <div style={{ padding:'4px 24px 14px', flexShrink:0 }}>
         <div style={{ ...T.label, marginBottom:5, color:accent }}>{recipe.category}</div>
-        <div style={{ ...T.cursive, fontSize:34, lineHeight:1.05, marginBottom:6 }}>{recipe.title}</div>
+        <div style={{ ...T.cursive, fontSize:34, lineHeight:1.05, marginBottom:4 }}>{recipe.title}</div>
+        {recipe.source && (
+          <div style={{ ...T.meta, fontSize:12.5, marginBottom:6, color:MUTED }}>
+            Chef: <span style={{ fontWeight:600, color:'#3a3a3a' }}>{recipe.source}</span>
+          </div>
+        )}
         <div style={{ ...T.serif, fontStyle:'italic', fontSize:13.5, color:MUTED, lineHeight:1.55, marginBottom:14 }}>{recipe.note}</div>
         <div style={{ display:'flex', gap:18, alignItems:'center' }}>
           <div style={{ display:'flex', alignItems:'center', gap:6, color:MUTED }}>
