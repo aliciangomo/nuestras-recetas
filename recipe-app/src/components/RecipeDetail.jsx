@@ -103,11 +103,6 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
       <div style={{ padding:'4px 24px 14px', flexShrink:0 }}>
         <div style={{ ...T.label, marginBottom:5, color:accent }}>{recipe.category}</div>
         <div style={{ ...T.cursive, fontSize:34, lineHeight:1.05, marginBottom:4 }}>{recipe.title}</div>
-        {recipe.source && (
-          <div style={{ ...T.meta, fontSize:12.5, marginBottom:6, color:MUTED }}>
-            Chef: <span style={{ fontWeight:600, color:'#3a3a3a' }}>{recipe.source}</span>
-          </div>
-        )}
         <div style={{ ...T.serif, fontStyle:'italic', fontSize:13.5, color:MUTED, lineHeight:1.55, marginBottom:14 }}>{recipe.note}</div>
         <div style={{ display:'flex', gap:18, alignItems:'center' }}>
           <div style={{ display:'flex', alignItems:'center', gap:6, color:MUTED }}>
@@ -121,6 +116,7 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
             <button onClick={() => setServings(servings + 1)} style={{ width:22, height:22, borderRadius:11, border:'1px solid ' + FAINT, background:'#fff', color:INK, cursor:'pointer', fontSize:13, lineHeight:1, padding:0 }}>+</button>
             <span style={{ ...T.meta }}>{S.servings}</span>
           </div>
+          {recipe.source && <span style={{ ...T.meta, color:MUTED }}>{recipe.source}</span>}
         </div>
       </div>
 
