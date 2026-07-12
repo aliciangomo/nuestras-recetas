@@ -29,6 +29,7 @@ export const S = {
 
   // Add recipe
   newRecipe: 'Nueva Receta',
+  editRecipe: 'Editar Receta',
   cancel: 'Cancelar',
   save: 'Guardar',
   writeItOut: '✎  Escribir',
@@ -42,9 +43,12 @@ export const S = {
   cookTime: 'Tiempo',
   cookTimePlaceholder: 'p.ej. 45m',
   servingsLabel: 'Porciones',
-  fromLabel: 'De',
+  fromLabel: 'Chef',
   fromPlaceholder: 'p.ej. Mamá, Tía Bea',
-  note: 'Una nota',
+  linkLabel: 'Enlace',
+  linkPlaceholder: 'https://www.bbcgoodfood.com/…',
+  viewLink: '→ Ver receta online',
+  note: 'Nota personal',
   notePlaceholder: 'Un recuerdo, quién te lo enseñó, cuándo hacerlo…',
   ingredientsLabel: 'Ingredientes',
   onePerLine: 'uno por línea',

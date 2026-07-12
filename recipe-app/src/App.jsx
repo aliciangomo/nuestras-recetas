@@ -19,11 +19,17 @@ export default function App() {
   const tok = TOKENS[palette];
   const accent = tok.accent;
 
-  const [recipes, setRecipes] = useState(INITIAL_RECIPES);
+  const [recipes, setRecipes] = useState(() => {
+    try {
+      const saved = localStorage.getItem('nuestrasRecetas_v1');
+      return saved ? JSON.parse(saved) : INITIAL_RECIPES;
+    } catch { return INITIAL_RECIPES; }
+  });
   const [tab, setTab] = useState('home');
   const [selectedId, setSelectedId] = useState(null);
   const [shareTarget, setShareTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [editTarget, setEditTarget] = useState(null);
   const [toast, setToast] = useState(null);
 
   const selected = selectedId != null ? recipes.find(r => r.id === selectedId) : null;
@@ -41,6 +47,15 @@ export default function App() {
     flashToast(S.toastPhoto);
   };
 
+  const onAddPhoto = (id, dataUrl) => {
+    setRecipes(rs => rs.map(r => r.id === id ? { ...r, photos: [...(r.photos || []), dataUrl] } : r));
+    flashToast(S.toastPhoto);
+  };
+
+  const onRemovePhoto = (id, idx) => {
+    setRecipes(rs => rs.map(r => r.id === id ? { ...r, photos: (r.photos || []).filter((_, i) => i !== idx) } : r));
+  };
+
   const confirmDelete = () => {
     setRecipes(rs => rs.filter(r => r.id !== deleteTarget.id));
     setDeleteTarget(null);
@@ -54,24 +69,37 @@ export default function App() {
     flashToast(S.toastAdded);
   };
 
+  const updateRecipe = r => {
+    setRecipes(rs => rs.map(x => x.id === r.id ? r : x));
+    setEditTarget(null);
+    setSelectedId(r.id);
+    flashToast('Receta actualizada ✓');
+  };
+
   const flashToast = msg => {
     setToast(msg);
     setTimeout(() => setToast(null), 1800);
   };
 
   useEffect(() => {
+    try { localStorage.setItem('nuestrasRecetas_v1', JSON.stringify(recipes)); } catch {}
+  }, [recipes]);
+
+  useEffect(() => {
     document.body.style.background = tok.bg;
     document.body.style.backgroundImage = `radial-gradient(ellipse at 30% 20%, ${tok.tint} 0%, ${tok.bg} 60%)`;
   }, [tok]);
 
-  const showNav = !selected && tab !== 'add';
+  const showNav = !selected && tab !== 'add' && !editTarget;
   const screenBg = tok.screen;
 
   let main = null;
   if (welcome) {
     main = <WelcomeScreen onEnter={() => setWelcome(false)}/>;
+  } else if (editTarget) {
+    main = <AddRecipe initialRecipe={editTarget} onBack={() => { setEditTarget(null); setSelectedId(editTarget.id); }} onUpdate={updateRecipe} onAdd={addRecipe} accent={accent} screenBg={screenBg}/>;
   } else if (selected) {
-    main = <RecipeDetail recipe={selected} onBack={() => setSelectedId(null)} onToggleFav={toggleFav} onDelete={r => setDeleteTarget(r)} onShare={r => setShareTarget(r)} onPhotoChange={onPhotoChange} accent={accent} screenBg={screenBg}/>;
+    main = <RecipeDetail recipe={selected} onBack={() => setSelectedId(null)} onToggleFav={toggleFav} onDelete={r => setDeleteTarget(r)} onShare={r => setShareTarget(r)} onPhotoChange={onPhotoChange} onAddPhoto={onAddPhoto} onRemovePhoto={onRemovePhoto} onEdit={r => setEditTarget(r)} accent={accent} screenBg={screenBg}/>;
   } else if (tab === 'home') {
     main = <HomeScreen recipes={recipes} onRecipe={setSelectedId} accent={accent} screenBg={screenBg}/>;
   } else if (tab === 'search') {

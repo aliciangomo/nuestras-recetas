@@ -5,19 +5,36 @@ import { I } from '../icons.jsx';
 import { T, FAINT, MUTED, INK } from '../tokens.js';
 import { S } from '../strings.js';
 
-export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, onPhotoChange, accent, screenBg }) {
+export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, onPhotoChange, onAddPhoto, onRemovePhoto, onEdit, accent, screenBg }) {
   const [tab, setTab] = useState('ingredients');
   const [checked, setChecked] = useState({});
   const [servings, setServings] = useState(recipe.servings);
+  const [photoIdx, setPhotoIdx] = useState(0);
   const inputRef = useRef(null);
+  const touchStartX = useRef(null);
   const ratio = servings / recipe.servings;
+
+  const allPhotos = [recipe.photo, ...(recipe.photos || [])].filter(Boolean);
 
   const handleFile = (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
     const reader = new FileReader();
-    reader.onload = ev => onPhotoChange(recipe.id, ev.target.result);
+    reader.onload = ev => {
+      if (!recipe.photo) onPhotoChange(recipe.id, ev.target.result);
+      else onAddPhoto(recipe.id, ev.target.result);
+    };
     reader.readAsDataURL(f);
+    e.target.value = '';
+  };
+
+  const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (dx > 50) setPhotoIdx(i => Math.max(0, i - 1));
+    else if (dx < -50) setPhotoIdx(i => Math.min(allPhotos.length - 1, i + 1));
+    touchStartX.current = null;
   };
 
   const scaleIngredient = (ing) => {
@@ -34,18 +51,51 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
     <div className="fade-in" style={{ height:'100%', display:'flex', flexDirection:'column', background:screenBg }}>
       <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} style={{ display:'none' }}/>
 
-      {/* Hero photo */}
-      <div style={{ position:'relative', flexShrink:0, height:340 }}>
-        <Photo src={recipe.photo} alt={recipe.title} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
+      {/* Hero photo carousel */}
+      <div style={{ position:'relative', flexShrink:0, height:340, overflow:'hidden' }}
+           onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
+
+        {/* Photo strip */}
+        <div style={{ display:'flex', height:'100%', transform:`translateX(-${photoIdx * 100}%)`, transition:'transform 0.32s ease', willChange:'transform' }}>
+          {allPhotos.length > 0 ? allPhotos.map((p, i) => (
+            <div key={i} style={{ minWidth:'100%', height:'100%', position:'relative' }}>
+              <Photo src={p} alt={recipe.title} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
+              {/* Remove extra photo (not the cover) */}
+              {i > 0 && (
+                <button onClick={() => { onRemovePhoto(recipe.id, i - 1); setPhotoIdx(p => Math.min(p, allPhotos.length - 2)); }}
+                  style={{ position:'absolute', bottom:72, right:12, width:26, height:26, borderRadius:13, background:'rgba(0,0,0,0.55)', color:'#fff', border:'none', cursor:'pointer', fontSize:15, lineHeight:1, display:'flex', alignItems:'center', justifyContent:'center', zIndex:6 }}>×</button>
+              )}
+            </div>
+          )) : (
+            <div style={{ minWidth:'100%', height:'100%', background:'#f0f0f0', display:'flex', alignItems:'center', justifyContent:'center', color:MUTED }}>
+              {I.camera({ width:36, height:36 })}
+            </div>
+          )}
+        </div>
+
+        {/* Dot indicators */}
+        {allPhotos.length > 1 && (
+          <div style={{ position:'absolute', bottom:66, left:0, right:0, display:'flex', justifyContent:'center', gap:5, zIndex:5, pointerEvents:'none' }}>
+            {allPhotos.map((_, i) => (
+              <div key={i} style={{ width: i === photoIdx ? 18 : 6, height:6, borderRadius:3,
+                                    background: i === photoIdx ? '#fff' : 'rgba(255,255,255,0.55)',
+                                    transition:'width 0.2s' }}/>
+            ))}
+          </div>
+        )}
+
+        {/* Buttons row */}
         <div style={{ position:'absolute', top:54, left:14, right:14, display:'flex', justifyContent:'space-between', zIndex:5 }}>
           <PillBtn onClick={onBack}>{I.back({ width:20, height:20 })}</PillBtn>
           <div style={{ display:'flex', gap:8 }}>
             <PillBtn onClick={() => inputRef.current?.click()}>{I.camera({ width:18, height:18 })}</PillBtn>
+            <PillBtn onClick={() => onEdit(recipe)}>{I.edit({ width:16, height:16 })}</PillBtn>
             <PillBtn onClick={() => onShare(recipe)}>{I.share({ width:17, height:17 })}</PillBtn>
             <PillBtn onClick={() => onToggleFav(recipe.id)} accent={recipe.favourite ? accent : null}>{I.heart(recipe.favourite, { width:18, height:18 })}</PillBtn>
             <PillBtn onClick={() => onDelete(recipe)}>{I.trash({ width:17, height:17 })}</PillBtn>
           </div>
         </div>
+
         <div style={{ position:'absolute', left:0, right:0, bottom:0, height:60, background:`linear-gradient(transparent, ${screenBg})`, pointerEvents:'none' }}/>
       </div>
 
@@ -111,6 +161,14 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
           <span>{S.from}{recipe.source}</span>
           <span>{S.favouriteThis}</span>
         </div>
+        {recipe.link && (
+          <div style={{ marginTop:12 }}>
+            <a href={recipe.link} target="_blank" rel="noopener noreferrer"
+               style={{ ...T.body, fontSize:14, fontWeight:700, color:accent, textDecoration:'none' }}>
+              {S.viewLink}
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
