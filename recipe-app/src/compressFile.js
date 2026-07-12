@@ -1,4 +1,4 @@
-export function compressFile(file, maxPx = 640, quality = 0.60) {
+export function compressFile(file, maxPx = 480, quality = 0.45) {
   return new Promise((resolve) => {
     const timeout = setTimeout(() => resolve(null), 20000);
     const reader = new FileReader();
