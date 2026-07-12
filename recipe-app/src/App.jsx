@@ -48,7 +48,13 @@ export default function App() {
       } else {
         const data = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
         setRecipes(data);
-        try { localStorage.setItem('recetas_cache', JSON.stringify(data)); } catch {}
+        // Cache without base64 photos — keeps cache small and write non-blocking
+        setTimeout(() => {
+          try {
+            const slim = data.map(r => ({ ...r, photo: r.photo?.startsWith('data:') ? null : r.photo, photos: [] }));
+            localStorage.setItem('recetas_cache', JSON.stringify(slim));
+          } catch {}
+        }, 0);
       }
     });
     return unsub;
@@ -99,7 +105,15 @@ export default function App() {
   };
 
   const updateRecipe = async (r) => {
-    await setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
+    const existing = recipeList.find(x => x.id === r.id);
+    const photosChanged = existing?.photo !== r.photo ||
+      JSON.stringify(existing?.photos) !== JSON.stringify(r.photos || []);
+    if (photosChanged) {
+      await setDoc(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
+    } else {
+      const { photo, photos, ...textFields } = r;
+      await updateDoc(doc(col, String(r.id)), textFields);
+    }
     setEditTarget(null);
     setSelectedId(r.id);
     flashToast('Receta actualizada ✓');
