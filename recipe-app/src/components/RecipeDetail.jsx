@@ -4,7 +4,7 @@ import { PillBtn } from './PillBtn.jsx';
 import { I } from '../icons.jsx';
 import { T, FAINT, MUTED, INK } from '../tokens.js';
 import { S } from '../strings.js';
-import { compressFile } from '../compressFile.js';
+import { uploadPhoto } from '../uploadPhoto.js';
 
 export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, onPhotoChange, onAddPhoto, onRemovePhoto, onEdit, accent, screenBg }) {
   const [tab, setTab] = useState('ingredients');
@@ -23,11 +23,15 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
     if (!f) return;
     e.target.value = '';
     setCompressing(true);
-    const dataUrl = await compressFile(f);
-    setCompressing(false);
-    if (!dataUrl) return;
-    if (!recipe.photo) onPhotoChange(recipe.id, dataUrl);
-    else onAddPhoto(recipe.id, dataUrl);
+    try {
+      const url = await uploadPhoto(f);
+      if (!recipe.photo) onPhotoChange(recipe.id, url);
+      else onAddPhoto(recipe.id, url);
+    } catch {
+      // upload failed — spinner will disappear, user can retry
+    } finally {
+      setCompressing(false);
+    }
   };
 
   const handleTouchStart = (e) => { touchStartX.current = e.touches[0].clientX; };

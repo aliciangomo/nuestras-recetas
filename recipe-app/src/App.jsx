@@ -62,7 +62,7 @@ export default function App() {
         // Cache without base64 photos — keeps cache small and write non-blocking
         setTimeout(() => {
           try {
-            const slim = data.map(r => ({ ...r, photo: r.photo?.startsWith('data:') ? null : r.photo, photos: [] }));
+            const slim = data.map(r => ({ ...r, photo: r.photo?.startsWith('data:') ? null : r.photo, photos: (r.photos||[]).filter(p => !p?.startsWith('data:')) }));
             localStorage.setItem('recetas_cache', JSON.stringify(slim));
           } catch {}
         }, 0);
