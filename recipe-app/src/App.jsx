@@ -34,10 +34,12 @@ export default function App() {
 
   const col = collection(db, 'recipes');
   const inFlight = useRef(new Set());
+  const [firestoreError, setFirestoreError] = useState(null);
 
   // Real-time sync with Firestore
   useEffect(() => {
     const unsub = onSnapshot(col, async (snap) => {
+      setFirestoreError(null);
       if (snap.empty && !seeded.current) {
         seeded.current = true;
         // Check a Firestore sentinel before seeding — this survives reinstalls
@@ -72,6 +74,11 @@ export default function App() {
           } catch {}
         }, 0);
       }
+    }, (err) => {
+      console.error('Firestore error:', err);
+      setFirestoreError(err.code || 'permission-denied');
+      // Still show cached recipes if available
+      setRecipes(prev => prev);
     });
     return unsub;
   }, []);
@@ -209,6 +216,12 @@ export default function App() {
         {deleteTarget && <DeleteSheet recipe={deleteTarget} onConfirm={confirmDelete} onCancel={() => setDeleteTarget(null)}/>}
         {toast && (
           <div style={{ position:'absolute', top:62, left:'50%', transform:'translateX(-50%)', background:'rgba(0,0,0,0.85)', color:'#fff', padding:'9px 18px', borderRadius:20, ...T.body, fontSize:13, fontWeight:500, zIndex:400, backdropFilter:'blur(10px)', whiteSpace:'nowrap' }}>{toast}</div>
+        )}
+        {firestoreError && (
+          <div style={{ position:'absolute', top:0, left:0, right:0, background:'#c0392b', color:'#fff', padding:'54px 16px 12px', textAlign:'center', zIndex:500, ...T.body, fontSize:13, fontWeight:500, lineHeight:1.5 }}>
+            Sin conexión a la base de datos.<br/>
+            <span style={{ fontWeight:400, fontSize:12, opacity:0.85 }}>Comprueba que las reglas de Firebase no han caducado.</span>
+          </div>
         )}
       </IOSDevice>
     </div>
