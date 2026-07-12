@@ -39,13 +39,21 @@ export default function App() {
   useEffect(() => {
     const unsub = onSnapshot(col, async (snap) => {
       if (snap.empty && !seeded.current) {
+        // Guard: if we've ever had real data, a momentary empty snapshot is a
+        // network blip — do NOT re-seed or we'll overwrite the user's recipes.
+        if (localStorage.getItem('recetas_seeded')) return;
         seeded.current = true;
+        localStorage.setItem('recetas_seeded', '1');
         const batch = writeBatch(db);
         INITIAL_RECIPES.forEach(r => {
           batch.set(doc(col, String(r.id)), { ...r, photos: r.photos || [] });
         });
         await batch.commit();
-      } else {
+      } else if (!snap.empty) {
+        // Mark as seeded so we never accidentally re-seed on this device
+        if (!localStorage.getItem('recetas_seeded')) {
+          localStorage.setItem('recetas_seeded', '1');
+        }
         const data = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
         // Preserve optimistic state for any recipe whose write is still in-flight
         setRecipes(prev => data.map(r =>
