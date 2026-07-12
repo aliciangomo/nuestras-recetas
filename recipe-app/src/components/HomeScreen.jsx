@@ -4,11 +4,11 @@ import { I } from '../icons.jsx';
 import { T, FAINT, MUTED } from '../tokens.js';
 import { S } from '../strings.js';
 
+
 export function HomeScreen({ recipes, onRecipe, accent, screenBg }) {
   const [filter, setFilter] = useState(S.catAll);
   const cats = [S.catAll, ...Array.from(new Set(recipes.map(r => r.category)))];
   const shown = filter === S.catAll ? recipes : recipes.filter(r => r.category === filter);
-  const recent = [...recipes].sort((a, b) => b.id - a.id).slice(0, 3);
 
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:screenBg }}>
@@ -17,27 +17,6 @@ export function HomeScreen({ recipes, onRecipe, accent, screenBg }) {
         <div style={{ ...T.label, color:accent }}>{S.tagline}</div>
         <div style={{ ...T.cursive, fontSize:38, lineHeight:1, marginTop:6 }}>{S.appName}</div>
         <div style={{ ...T.meta, marginTop:4 }}>{S.recipeCount(recipes.length)} · {S.savedCount(recipes.filter(r => r.favourite).length)}</div>
-      </div>
-
-      {/* Recently added */}
-      <div style={{ marginBottom:16, flexShrink:0 }}>
-        <div style={{ ...T.label, padding:'4px 24px 10px' }}>{S.recentlyAdded}</div>
-        <div style={{ display:'flex', gap:12, overflowX:'auto', padding:'0 24px 8px' }}>
-          {recent.map(r => (
-            <div key={r.id} onClick={() => onRecipe(r.id)} style={{ flexShrink:0, width:148, cursor:'pointer' }}>
-              <div style={{ width:148, height:148, borderRadius:8, overflow:'hidden', position:'relative', background:'#f0f0f0' }}>
-                <Photo src={r.photo} alt={r.title} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}/>
-                {r.favourite && (
-                  <div style={{ position:'absolute', top:8, right:8, width:24, height:24, borderRadius:12, background:'rgba(255,255,255,0.92)', display:'flex', alignItems:'center', justifyContent:'center', color:accent }}>
-                    {I.heart(true, { width:13, height:13 })}
-                  </div>
-                )}
-              </div>
-              <div style={{ ...T.cursive, fontSize:18, lineHeight:1.15, marginTop:8 }}>{r.title}</div>
-              <div style={{ ...T.meta, fontSize:11, marginTop:1 }}>{r.time}</div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Category filter */}
