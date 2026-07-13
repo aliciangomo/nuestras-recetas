@@ -122,7 +122,7 @@ export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, scre
       <div style={{ flex:1, overflowY:'auto', padding:'10px 24px 24px' }}>
         <div>
             {/* Photo uploader */}
-            <div onClick={openPhoto} style={{ marginTop:14, height:170, borderRadius:10, overflow:'hidden', position:'relative', cursor:'pointer', background:photo ? '#f0f0f0' : 'transparent', border:photo ? 'none' : '1.5px dashed rgba(0,0,0,0.18)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:8, color:MUTED }}>
+            <div onClick={openPhoto} style={{ marginTop:14, height:170, borderRadius:10, overflow:'hidden', position:'relative', cursor:'pointer', background:photoPreview ? '#f0f0f0' : 'transparent', border:photoPreview ? 'none' : '1.5px dashed rgba(0,0,0,0.18)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:8, color:MUTED }}>
               {mainUploading ? (
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8, color:MUTED }}>
                   <div style={{ width:28, height:28, border:'3px solid rgba(0,0,0,0.1)', borderTop:'3px solid ' + MUTED, borderRadius:'50%', animation:'spin 0.8s linear infinite' }}/>
