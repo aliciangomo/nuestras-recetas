@@ -8,7 +8,7 @@ export function SavedScreen({ recipes, onRecipe, accent, screenBg }) {
 
   return (
     <div className="fade-in" style={{ height:'100%', display:'flex', flexDirection:'column', background:screenBg }}>
-      <div style={{ padding:'68px 24px 14px', flexShrink:0 }}>
+      <div style={{ padding:'calc(env(safe-area-inset-top, 0px) + 24px) 24px 14px', flexShrink:0 }}>
         <div style={{ ...T.label, color:accent }}>{S.savedTagline}</div>
         <div style={{ ...T.cursive, fontSize:34, lineHeight:1, marginTop:6 }}>{S.savedTitle}</div>
         <div style={{ ...T.meta, marginTop:4 }}>{S.favCount(favs.length)}</div>

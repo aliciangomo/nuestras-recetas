@@ -91,7 +91,7 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
         )}
 
         {/* Buttons row */}
-        <div style={{ position:'absolute', top:54, left:14, right:14, display:'flex', justifyContent:'space-between', zIndex:5 }}>
+        <div style={{ position:'absolute', top:'calc(env(safe-area-inset-top, 0px) + 10px)', left:14, right:14, display:'flex', justifyContent:'space-between', zIndex:5 }}>
           <PillBtn onClick={onBack}>{I.back({ width:20, height:20 })}</PillBtn>
           <div style={{ display:'flex', gap:8 }}>
             <PillBtn onClick={() => !compressing && inputRef.current?.click()}>

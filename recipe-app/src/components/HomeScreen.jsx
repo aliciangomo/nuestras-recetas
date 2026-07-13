@@ -13,7 +13,7 @@ export function HomeScreen({ recipes, onRecipe, accent, screenBg }) {
   return (
     <div style={{ height:'100%', display:'flex', flexDirection:'column', background:screenBg }}>
       {/* Header */}
-      <div style={{ padding:'68px 24px 14px', flexShrink:0 }}>
+      <div style={{ padding:'calc(env(safe-area-inset-top, 0px) + 24px) 24px 14px', flexShrink:0 }}>
         <div style={{ ...T.label, color:accent }}>{S.tagline}</div>
         <div style={{ ...T.cursive, fontSize:38, lineHeight:1, marginTop:6 }}>{S.appName}</div>
         <div style={{ ...T.meta, marginTop:4 }}>{S.recipeCount(recipes.length)} · {S.savedCount(recipes.filter(r => r.favourite).length)}</div>

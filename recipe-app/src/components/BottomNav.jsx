@@ -11,7 +11,7 @@ export function BottomNav({ tab, onTab, accent, screenBg }) {
   ];
 
   return (
-    <div style={{ position:'absolute', bottom:0, left:0, right:0, height:84, background:screenBg || '#fff', borderTop:'1px solid rgba(0,0,0,0.05)', display:'flex', zIndex:100 }}>
+    <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'calc(84px + env(safe-area-inset-bottom, 0px))', background:screenBg || '#fff', borderTop:'1px solid rgba(0,0,0,0.05)', display:'flex', paddingBottom:'env(safe-area-inset-bottom, 0px)', zIndex:100 }}>
       {items.map(it => {
         const active = tab === it.id;
         const Ico = it.ico;

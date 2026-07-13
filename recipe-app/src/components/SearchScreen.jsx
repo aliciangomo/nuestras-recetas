@@ -48,7 +48,7 @@ export function SearchScreen({ recipes, onRecipe, accent, screenBg, palette }) {
 
   return (
     <div className="fade-in" style={{ height:'100%', display:'flex', flexDirection:'column', background:screenBg }}>
-      <div style={{ padding:'68px 24px 4px', flexShrink:0 }}>
+      <div style={{ padding:'calc(env(safe-area-inset-top, 0px) + 24px) 24px 4px', flexShrink:0 }}>
         <div style={{ ...T.cursive, fontSize:32, lineHeight:1 }}>{S.searchTitle}</div>
         <div style={{ ...T.meta, marginTop:2, fontStyle:'italic' }}>{S.searchTagline}</div>
       </div>

@@ -113,7 +113,7 @@ export function AddRecipe({ onBack, onAdd, onUpdate, initialRecipe, accent, scre
       {photoInput}
       <input ref={extraPhotoRef} type="file" accept="image/*" onChange={addExtraPhoto} style={{ display:'none' }}/>
       {/* Header */}
-      <div style={{ padding:'58px 20px 12px', display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 }}>
+      <div style={{ padding:'calc(env(safe-area-inset-top, 0px) + 14px) 20px 12px', display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0 }}>
         <button onClick={onBack} style={{ ...T.body, fontSize:14, color:MUTED, background:'none', border:'none', cursor:'pointer', padding:0 }}>{S.cancel}</button>
         <div style={{ ...T.body, fontSize:15, fontWeight:600 }}>{isEdit ? S.editRecipe : S.newRecipe}</div>
         <button onClick={save} disabled={!valid || saving} style={{ ...T.body, fontSize:14, fontWeight:600, color:valid && !saving ? accent : '#ccc', background:'none', border:'none', cursor:valid && !saving ? 'pointer' : 'default', padding:0 }}>{saving ? 'Guardando…' : uploadingAny ? 'Subiendo…' : S.save}</button>

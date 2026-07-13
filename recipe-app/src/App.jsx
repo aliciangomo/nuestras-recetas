@@ -4,7 +4,6 @@ import { db } from './firebase.js';
 import { TOKENS, T } from './tokens.js';
 import { INITIAL_RECIPES } from './data.js';
 import { S } from './strings.js';
-import { IOSDevice } from './components/IOSDevice.jsx';
 import { BottomNav } from './components/BottomNav.jsx';
 import { WelcomeScreen } from './components/WelcomeScreen.jsx';
 import { HomeScreen } from './components/HomeScreen.jsx';
@@ -205,25 +204,22 @@ export default function App() {
   }
 
   return (
-    <div style={{ display:'flex', flexDirection:'column', alignItems:'center', maxWidth:'100vw', overflow:'hidden' }}>
-
-      <IOSDevice width={390} height={844}>
-        <div style={{ position:'absolute', top:0, left:0, right:0, bottom: (!welcome && showNav) ? 84 : 0, overflow:'hidden' }}>
-          {main}
+    <div style={{ width:'100vw', height:'100dvh', overflow:'hidden', position:'relative', background:screenBg }}>
+      <div style={{ position:'absolute', top:0, left:0, right:0, bottom: (!welcome && showNav) ? 'calc(84px + env(safe-area-inset-bottom, 0px))' : 0, overflow:'hidden' }}>
+        {main}
+      </div>
+      {!welcome && showNav && <BottomNav tab={tab} onTab={goTab} accent={accent} screenBg={screenBg}/>}
+      {shareTarget && <ShareSheet recipe={shareTarget} onClose={() => setShareTarget(null)} accent={accent} palette={tok}/>}
+      {deleteTarget && <DeleteSheet recipe={deleteTarget} onConfirm={confirmDelete} onCancel={() => setDeleteTarget(null)}/>}
+      {toast && (
+        <div style={{ position:'absolute', top:'calc(env(safe-area-inset-top, 0px) + 12px)', left:'50%', transform:'translateX(-50%)', background:'rgba(0,0,0,0.85)', color:'#fff', padding:'9px 18px', borderRadius:20, ...T.body, fontSize:13, fontWeight:500, zIndex:400, backdropFilter:'blur(10px)', whiteSpace:'nowrap' }}>{toast}</div>
+      )}
+      {firestoreError && (
+        <div style={{ position:'absolute', top:0, left:0, right:0, background:'#c0392b', color:'#fff', padding:'calc(env(safe-area-inset-top, 0px) + 12px) 16px 12px', textAlign:'center', zIndex:500, ...T.body, fontSize:13, fontWeight:500, lineHeight:1.5 }}>
+          Sin conexión a la base de datos.<br/>
+          <span style={{ fontWeight:400, fontSize:12, opacity:0.85 }}>Comprueba que las reglas de Firebase no han caducado.</span>
         </div>
-        {!welcome && showNav && <BottomNav tab={tab} onTab={goTab} accent={accent} screenBg={screenBg}/>}
-        {shareTarget && <ShareSheet recipe={shareTarget} onClose={() => setShareTarget(null)} accent={accent} palette={tok}/>}
-        {deleteTarget && <DeleteSheet recipe={deleteTarget} onConfirm={confirmDelete} onCancel={() => setDeleteTarget(null)}/>}
-        {toast && (
-          <div style={{ position:'absolute', top:62, left:'50%', transform:'translateX(-50%)', background:'rgba(0,0,0,0.85)', color:'#fff', padding:'9px 18px', borderRadius:20, ...T.body, fontSize:13, fontWeight:500, zIndex:400, backdropFilter:'blur(10px)', whiteSpace:'nowrap' }}>{toast}</div>
-        )}
-        {firestoreError && (
-          <div style={{ position:'absolute', top:0, left:0, right:0, background:'#c0392b', color:'#fff', padding:'54px 16px 12px', textAlign:'center', zIndex:500, ...T.body, fontSize:13, fontWeight:500, lineHeight:1.5 }}>
-            Sin conexión a la base de datos.<br/>
-            <span style={{ fontWeight:400, fontSize:12, opacity:0.85 }}>Comprueba que las reglas de Firebase no han caducado.</span>
-          </div>
-        )}
-      </IOSDevice>
+      )}
     </div>
   );
 }
