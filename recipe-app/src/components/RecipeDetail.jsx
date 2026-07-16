@@ -12,9 +12,7 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
   const [servings, setServings] = useState(recipe.servings);
   const [photoIdx, setPhotoIdx] = useState(0);
   const [compressing, setCompressing] = useState(false);
-  const [noteExpanded, setNoteExpanded] = useState(false);
   const inputRef = useRef(null);
-  const scrollRef = useRef(null);
   const touchStartX = useRef(null);
   const ratio = servings / recipe.servings;
 
@@ -115,23 +113,7 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
       <div style={{ padding:'4px 24px 14px', flexShrink:0 }}>
         <div style={{ ...T.label, marginBottom:5, color:accent }}>{recipe.category}</div>
         <div style={{ ...T.cursive, fontSize:34, lineHeight:1.05, marginBottom:4 }}>{recipe.title}</div>
-        {recipe.note ? (
-          <div style={{ marginBottom:14 }} onClick={() => setNoteExpanded(e => !e)}>
-            <div style={{ ...T.serif, fontStyle:'italic', fontSize:13.5, color:MUTED, lineHeight:1.55,
-              display:'-webkit-box', WebkitBoxOrient:'vertical',
-              WebkitLineClamp: noteExpanded ? 'unset' : 2,
-              overflow: noteExpanded ? 'visible' : 'hidden',
-              transition:'all 0.2s' }}>
-              {recipe.note}
-            </div>
-            {!noteExpanded && recipe.note.length > 80 && (
-              <span style={{ ...T.meta, fontSize:12, color:accent, cursor:'pointer' }}>Leer más</span>
-            )}
-            {noteExpanded && (
-              <span style={{ ...T.meta, fontSize:12, color:accent, cursor:'pointer' }}>Cerrar</span>
-            )}
-          </div>
-        ) : null}
+        <div style={{ ...T.serif, fontStyle:'italic', fontSize:13.5, color:MUTED, lineHeight:1.55, marginBottom:14 }}>{recipe.note}</div>
         <div style={{ display:'flex', gap:18, alignItems:'center' }}>
           <div style={{ display:'flex', alignItems:'center', gap:6, color:MUTED }}>
             {I.clock({ width:14, height:14 })}
@@ -161,7 +143,7 @@ export function RecipeDetail({ recipe, onBack, onToggleFav, onDelete, onShare, o
       </div>
 
       {/* Body */}
-      <div ref={scrollRef} onScroll={() => setNoteExpanded(false)} style={{ flex:1, overflowY:'auto', padding:'18px 24px 24px' }}>
+      <div style={{ flex:1, overflowY:'auto', padding:'18px 24px 24px' }}>
         {tab === 'ingredients' ? (
           <div className="fade-in">
             {recipe.ingredients.map((ing, i) => (
